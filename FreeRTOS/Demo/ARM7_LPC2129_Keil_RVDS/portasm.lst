@@ -1,0 +1,705 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;/*
+    2 00000000         ; * FreeRTOS Kernel V10.4.6
+    3 00000000         ; * Copyright (C) 2021 Amazon.com, Inc. or its affiliate
+                       s.  All Rights Reserved.
+    4 00000000         ; *
+    5 00000000         ; * SPDX-License-Identifier: MIT
+    6 00000000         ; *
+    7 00000000         ; * Permission is hereby granted, free of charge, to any
+                        person obtaining a copy of
+    8 00000000         ; * this software and associated documentation files (th
+                       e "Software"), to deal in
+    9 00000000         ; * the Software without restriction, including without 
+                       limitation the rights to
+   10 00000000         ; * use, copy, modify, merge, publish, distribute, subli
+                       cense, and/or sell copies of
+   11 00000000         ; * the Software, and to permit persons to whom the Soft
+                       ware is furnished to do so,
+   12 00000000         ; * subject to the following conditions:
+   13 00000000         ; *
+   14 00000000         ; * The above copyright notice and this permission notic
+                       e shall be included in all
+   15 00000000         ; * copies or substantial portions of the Software.
+   16 00000000         ; *
+   17 00000000         ; * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY O
+                       F ANY KIND, EXPRESS OR
+   18 00000000         ; * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+                        OF MERCHANTABILITY, FITNESS
+   19 00000000         ; * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+                       EVENT SHALL THE AUTHORS OR
+   20 00000000         ; * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES O
+                       R OTHER LIABILITY, WHETHER
+   21 00000000         ; * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+                        FROM, OUT OF OR IN
+   22 00000000         ; * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEA
+                       LINGS IN THE SOFTWARE.
+   23 00000000         ; *
+   24 00000000         ; * https://www.FreeRTOS.org
+   25 00000000         ; * https://github.com/FreeRTOS
+   26 00000000         ; *
+   27 00000000         ; */
+   28 00000000         
+   29 00000000                 INCLUDE          portmacro.inc
+    1 00000000         ;/*
+    2 00000000         ; * FreeRTOS Kernel V10.4.6
+    3 00000000         ; * Copyright (C) 2021 Amazon.com, Inc. or its affiliate
+                       s.  All Rights Reserved.
+    4 00000000         ; *
+    5 00000000         ; * SPDX-License-Identifier: MIT
+    6 00000000         ; *
+    7 00000000         ; * Permission is hereby granted, free of charge, to any
+                        person obtaining a copy of
+    8 00000000         ; * this software and associated documentation files (th
+                       e "Software"), to deal in
+    9 00000000         ; * the Software without restriction, including without 
+                       limitation the rights to
+   10 00000000         ; * use, copy, modify, merge, publish, distribute, subli
+                       cense, and/or sell copies of
+   11 00000000         ; * the Software, and to permit persons to whom the Soft
+                       ware is furnished to do so,
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   12 00000000         ; * subject to the following conditions:
+   13 00000000         ; *
+   14 00000000         ; * The above copyright notice and this permission notic
+                       e shall be included in all
+   15 00000000         ; * copies or substantial portions of the Software.
+   16 00000000         ; *
+   17 00000000         ; * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY O
+                       F ANY KIND, EXPRESS OR
+   18 00000000         ; * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+                        OF MERCHANTABILITY, FITNESS
+   19 00000000         ; * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO 
+                       EVENT SHALL THE AUTHORS OR
+   20 00000000         ; * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES O
+                       R OTHER LIABILITY, WHETHER
+   21 00000000         ; * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+                        FROM, OUT OF OR IN
+   22 00000000         ; * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEA
+                       LINGS IN THE SOFTWARE.
+   23 00000000         ; *
+   24 00000000         ; * https://www.FreeRTOS.org
+   25 00000000         ; * https://github.com/FreeRTOS
+   26 00000000         ; *
+   27 00000000         ; */
+   28 00000000         
+   29 00000000                 IMPORT           ulCriticalNesting ;
+   30 00000000                 IMPORT           pxCurrentTCB ;
+   31 00000000         
+   32 00000000         
+   33 00000000                 MACRO
+   34 00000000                 portRESTORE_CONTEXT
+   35 00000000         
+   36 00000000         
+   37 00000000                 LDR              R0, =pxCurrentTCB ; Set the LR 
+                                                            to the task stack. 
+                                                             The location was..
+                                                            .
+   38 00000000                 LDR              R0, [R0]    ; ... stored in pxC
+                                                            urrentTCB
+   39 00000000                 LDR              LR, [R0]
+   40 00000000         
+   41 00000000                 LDR              R0, =ulCriticalNesting ; The cr
+                                                            itical nesting dept
+                                                            h is the first item
+                                                             on...
+   42 00000000                 LDMFD            LR!, {R1}   ; ...the stack.  Lo
+                                                            ad it into the ulCr
+                                                            iticalNesting var.
+   43 00000000                 STR              R1, [R0]    ;
+   44 00000000         
+   45 00000000                 LDMFD            LR!, {R0}   ; Get the SPSR from
+                                                             the stack.
+   46 00000000                 MSR              SPSR_cxsf, R0 ;
+   47 00000000         
+   48 00000000                 LDMFD            LR, {R0-R14}^ ; Restore all sys
+                                                            tem mode registers 
+                                                            for the task.
+   49 00000000                 NOP                          ;
+   50 00000000         
+   51 00000000                 LDR              LR, [LR, #+60] ; Restore the re
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+                                                            turn address
+   52 00000000         
+   53 00000000         ; And return - correcting the offset in the LR to obtain
+                        ...
+   54 00000000                 SUBS             PC, LR, #4  ; ...the correct ad
+                                                            dress.
+   55 00000000         
+   56 00000000                 MEND
+   57 00000000         
+   58 00000000         ; /*****************************************************
+                       *****************/
+   59 00000000         
+   60 00000000                 MACRO
+   61 00000000                 portSAVE_CONTEXT
+   62 00000000         
+   63 00000000         
+   64 00000000                 STMDB            SP!, {R0}   ; Store R0 first as
+                                                             we need to use it.
+                                                            
+   65 00000000         
+   66 00000000                 STMDB            SP,{SP}^    ; Set R0 to point t
+                                                            o the task stack po
+                                                            inter.
+   67 00000000                 NOP                          ;
+   68 00000000                 SUB              SP, SP, #4  ;
+   69 00000000                 LDMIA            SP!,{R0}    ;
+   70 00000000         
+   71 00000000                 STMDB            R0!, {LR}   ; Push the return a
+                                                            ddress onto the sta
+                                                            ck.
+   72 00000000                 MOV              LR, R0      ; Now we have saved
+                                                             LR we can use it i
+                                                            nstead of R0.
+   73 00000000                 LDMIA            SP!, {R0}   ; Pop R0 so we can 
+                                                            save it onto the sy
+                                                            stem mode stack.
+   74 00000000         
+   75 00000000                 STMDB            LR,{R0-LR}^ ; Push all the syst
+                                                            em mode registers o
+                                                            nto the task stack.
+                                                            
+   76 00000000                 NOP                          ;
+   77 00000000                 SUB              LR, LR, #60 ;
+   78 00000000         
+   79 00000000                 MRS              R0, SPSR    ; Push the SPSR ont
+                                                            o the task stack.
+   80 00000000                 STMDB            LR!, {R0}   ;
+   81 00000000         
+   82 00000000                 LDR              R0, =ulCriticalNesting ;
+   83 00000000                 LDR              R0, [R0]    ;
+   84 00000000                 STMDB            LR!, {R0}   ;
+   85 00000000         
+   86 00000000                 LDR              R0, =pxCurrentTCB ; Store the n
+                                                            ew top of stack for
+                                                             the task.
+   87 00000000                 LDR              R1, [R0]    ;
+   88 00000000                 STR              LR, [R1]    ;
+   89 00000000         
+   90 00000000                 MEND
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+   91 00000000         
+   92 00000000                 END
+   30 00000000         
+   31 00000000                 IMPORT           vTaskSwitchContext
+   32 00000000                 IMPORT           xTaskIncrementTick
+   33 00000000         
+   34 00000000                 EXPORT           vPortYieldProcessor
+   35 00000000                 EXPORT           vPortStartFirstTask
+   36 00000000                 EXPORT           vPreemptiveTick
+   37 00000000                 EXPORT           vPortYield
+   38 00000000         
+   39 00000000         
+   40 00000000 FFFFF030 
+                       VICVECTADDR
+                               EQU              0xFFFFF030
+   41 00000000 E0004000 
+                       T0IR    EQU              0xE0004000
+   42 00000000 00000001 
+                       T0MATCHBIT
+                               EQU              0x00000001
+   43 00000000         
+   44 00000000                 ARM
+   45 00000000                 AREA             PORT_ASM, CODE, READONLY
+   46 00000000         
+   47 00000000         
+   48 00000000         
+   49 00000000         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;
+   50 00000000         ; Starting the first task is done by just restoring the 
+                       context
+   51 00000000         ; setup by pxPortInitialiseStack
+   52 00000000         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;
+   53 00000000         vPortStartFirstTask
+   54 00000000         
+   55 00000000                 PRESERVE8
+   56 00000000         
+   57 00000000                 portRESTORE_CONTEXT
+   35 00000000         
+   36 00000000         
+   37 00000000 E59F016C        LDR              R0, =pxCurrentTCB ; Set the LR 
+                                                            to the task stack. 
+                                                             The location was..
+                                                            .
+   38 00000004 E5900000        LDR              R0, [R0]    ; ... stored in pxC
+                                                            urrentTCB
+   39 00000008 E590E000        LDR              LR, [R0]
+   40 0000000C         
+   41 0000000C E59F0164        LDR              R0, =ulCriticalNesting ; The cr
+                                                            itical nesting dept
+                                                            h is the first item
+                                                             on...
+   42 00000010 E8BE0002        LDMFD            LR!, {R1}   ; ...the stack.  Lo
+                                                            ad it into the ulCr
+                                                            iticalNesting var.
+   43 00000014 E5801000        STR              R1, [R0]    ;
+   44 00000018         
+   45 00000018 E8BE0001        LDMFD            LR!, {R0}   ; Get the SPSR from
+                                                             the stack.
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+   46 0000001C E16FF000        MSR              SPSR_cxsf, R0 ;
+   47 00000020         
+   48 00000020 E8DE7FFF        LDMFD            LR, {R0-R14}^ ; Restore all sys
+                                                            tem mode registers 
+                                                            for the task.
+   49 00000024 E1A00000        NOP                          ;
+   50 00000028         
+   51 00000028 E59EE03C        LDR              LR, [LR, #+60] ; Restore the re
+                                                            turn address
+   52 0000002C         
+   53 0000002C         ; And return - correcting the offset in the LR to obtain
+                        ...
+   54 0000002C E25EF004        SUBS             PC, LR, #4  ; ...the correct ad
+                                                            dress.
+   55 00000030         
+   58 00000030         
+   59 00000030         vPortYield
+   60 00000030         
+   61 00000030                 PRESERVE8
+   62 00000030         
+   63 00000030 EF000000        SVC              0
+   64 00000034 E12FFF1E        bx               lr
+   65 00000038         
+   66 00000038         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;
+   67 00000038         ; Interrupt service routine for the SWI interrupt.  The 
+                       vector table is
+   68 00000038         ; configured in the startup.s file.
+   69 00000038         ;
+   70 00000038         ; vPortYieldProcessor() is used to manually force a cont
+                       ext switch.  The
+   71 00000038         ; SWI interrupt is generated by a call to taskYIELD() or
+                        portYIELD().
+   72 00000038         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;
+   73 00000038         
+   74 00000038         vPortYieldProcessor
+   75 00000038         
+   76 00000038                 PRESERVE8
+   77 00000038         
+   78 00000038         ; Within an IRQ ISR the link register has an offset from
+                        the true return
+   79 00000038         ; address, but an SWI ISR does not.  Add the offset manu
+                       ally so the same
+   80 00000038         ; ISR return code can be used in both cases.
+   81 00000038 E28EE004        ADD              LR, LR, #4
+   82 0000003C         
+   83 0000003C         ; Perform the context switch.
+   84 0000003C                 portSAVE_CONTEXT             ; Save current task
+                                                             context
+   62 0000003C         
+   63 0000003C         
+   64 0000003C E92D0001        STMDB            SP!, {R0}   ; Store R0 first as
+                                                             we need to use it.
+                                                            
+   65 00000040         
+   66 00000040 E94D2000        STMDB            SP,{SP}^    ; Set R0 to point t
+                                                            o the task stack po
+                                                            inter.
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+   67 00000044 E1A00000        NOP                          ;
+   68 00000048 E24DD004        SUB              SP, SP, #4  ;
+   69 0000004C E8BD0001        LDMIA            SP!,{R0}    ;
+   70 00000050         
+   71 00000050 E9204000        STMDB            R0!, {LR}   ; Push the return a
+                                                            ddress onto the sta
+                                                            ck.
+   72 00000054 E1A0E000        MOV              LR, R0      ; Now we have saved
+                                                             LR we can use it i
+                                                            nstead of R0.
+   73 00000058 E8BD0001        LDMIA            SP!, {R0}   ; Pop R0 so we can 
+                                                            save it onto the sy
+                                                            stem mode stack.
+   74 0000005C         
+   75 0000005C E94E7FFF        STMDB            LR,{R0-LR}^ ; Push all the syst
+                                                            em mode registers o
+                                                            nto the task stack.
+                                                            
+   76 00000060 E1A00000        NOP                          ;
+   77 00000064 E24EE03C        SUB              LR, LR, #60 ;
+   78 00000068         
+   79 00000068 E14F0000        MRS              R0, SPSR    ; Push the SPSR ont
+                                                            o the task stack.
+   80 0000006C E92E0001        STMDB            LR!, {R0}   ;
+   81 00000070         
+   82 00000070 E59F0100        LDR              R0, =ulCriticalNesting ;
+   83 00000074 E5900000        LDR              R0, [R0]    ;
+   84 00000078 E92E0001        STMDB            LR!, {R0}   ;
+   85 0000007C         
+   86 0000007C E59F00F0        LDR              R0, =pxCurrentTCB ; Store the n
+                                                            ew top of stack for
+                                                             the task.
+   87 00000080 E5901000        LDR              R1, [R0]    ;
+   88 00000084 E581E000        STR              LR, [R1]    ;
+   89 00000088         
+   85 00000088 E59F00EC        LDR              R0, =vTaskSwitchContext ; Get t
+                                                            he address of the c
+                                                            ontext switch funct
+                                                            ion
+   86 0000008C E1A0E00F        MOV              LR, PC      ; Store the return 
+                                                            address
+   87 00000090 E12FFF10        BX               R0          ; Call the contedxt
+                                                             switch function
+   88 00000094                 portRESTORE_CONTEXT          ; restore the conte
+                                                            xt of the selected 
+                                                            task
+   35 00000094         
+   36 00000094         
+   37 00000094 E59F00D8        LDR              R0, =pxCurrentTCB ; Set the LR 
+                                                            to the task stack. 
+                                                             The location was..
+                                                            .
+   38 00000098 E5900000        LDR              R0, [R0]    ; ... stored in pxC
+                                                            urrentTCB
+   39 0000009C E590E000        LDR              LR, [R0]
+   40 000000A0         
+   41 000000A0 E59F00D0        LDR              R0, =ulCriticalNesting ; The cr
+                                                            itical nesting dept
+                                                            h is the first item
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+                                                             on...
+   42 000000A4 E8BE0002        LDMFD            LR!, {R1}   ; ...the stack.  Lo
+                                                            ad it into the ulCr
+                                                            iticalNesting var.
+   43 000000A8 E5801000        STR              R1, [R0]    ;
+   44 000000AC         
+   45 000000AC E8BE0001        LDMFD            LR!, {R0}   ; Get the SPSR from
+                                                             the stack.
+   46 000000B0 E16FF000        MSR              SPSR_cxsf, R0 ;
+   47 000000B4         
+   48 000000B4 E8DE7FFF        LDMFD            LR, {R0-R14}^ ; Restore all sys
+                                                            tem mode registers 
+                                                            for the task.
+   49 000000B8 E1A00000        NOP                          ;
+   50 000000BC         
+   51 000000BC E59EE03C        LDR              LR, [LR, #+60] ; Restore the re
+                                                            turn address
+   52 000000C0         
+   53 000000C0         ; And return - correcting the offset in the LR to obtain
+                        ...
+   54 000000C0 E25EF004        SUBS             PC, LR, #4  ; ...the correct ad
+                                                            dress.
+   55 000000C4         
+   89 000000C4         
+   90 000000C4         
+   91 000000C4         
+   92 000000C4         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;;;;;;;
+   93 000000C4         ; Interrupt service routine for preemptive scheduler tic
+                       k timer
+   94 000000C4         ; Only used if portUSE_PREEMPTION is set to 1 in portmac
+                       ro.h
+   95 000000C4         ;
+   96 000000C4         ; Uses timer 0 of LPC21XX Family
+   97 000000C4         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                       ;;;;;;;;;;;;;;;;;;;;;;;
+   98 000000C4         
+   99 000000C4         vPreemptiveTick
+  100 000000C4         
+  101 000000C4                 PRESERVE8
+  102 000000C4         
+  103 000000C4                 portSAVE_CONTEXT             ; Save the context 
+                                                            of the current task
+                                                            .
+   62 000000C4         
+   63 000000C4         
+   64 000000C4 E92D0001        STMDB            SP!, {R0}   ; Store R0 first as
+                                                             we need to use it.
+                                                            
+   65 000000C8         
+   66 000000C8 E94D2000        STMDB            SP,{SP}^    ; Set R0 to point t
+                                                            o the task stack po
+                                                            inter.
+   67 000000CC E1A00000        NOP                          ;
+   68 000000D0 E24DD004        SUB              SP, SP, #4  ;
+   69 000000D4 E8BD0001        LDMIA            SP!,{R0}    ;
+   70 000000D8         
+   71 000000D8 E9204000        STMDB            R0!, {LR}   ; Push the return a
+                                                            ddress onto the sta
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+                                                            ck.
+   72 000000DC E1A0E000        MOV              LR, R0      ; Now we have saved
+                                                             LR we can use it i
+                                                            nstead of R0.
+   73 000000E0 E8BD0001        LDMIA            SP!, {R0}   ; Pop R0 so we can 
+                                                            save it onto the sy
+                                                            stem mode stack.
+   74 000000E4         
+   75 000000E4 E94E7FFF        STMDB            LR,{R0-LR}^ ; Push all the syst
+                                                            em mode registers o
+                                                            nto the task stack.
+                                                            
+   76 000000E8 E1A00000        NOP                          ;
+   77 000000EC E24EE03C        SUB              LR, LR, #60 ;
+   78 000000F0         
+   79 000000F0 E14F0000        MRS              R0, SPSR    ; Push the SPSR ont
+                                                            o the task stack.
+   80 000000F4 E92E0001        STMDB            LR!, {R0}   ;
+   81 000000F8         
+   82 000000F8 E59F0078        LDR              R0, =ulCriticalNesting ;
+   83 000000FC E5900000        LDR              R0, [R0]    ;
+   84 00000100 E92E0001        STMDB            LR!, {R0}   ;
+   85 00000104         
+   86 00000104 E59F0068        LDR              R0, =pxCurrentTCB ; Store the n
+                                                            ew top of stack for
+                                                             the task.
+   87 00000108 E5901000        LDR              R1, [R0]    ;
+   88 0000010C E581E000        STR              LR, [R1]    ;
+   89 00000110         
+  104 00000110         
+  105 00000110 E59F0068        LDR              R0, =xTaskIncrementTick ; Incre
+                                                            ment the tick count
+                                                            .
+  106 00000114 E1A0E00F        MOV              LR, PC      ; This may make a d
+                                                            elayed task ready
+  107 00000118 E12FFF10        BX               R0          ; to run.
+  108 0000011C         
+  109 0000011C E3500000        CMP              R0, #0
+  110 00000120 0A000002        BEQ              SkipContextSwitch
+  111 00000124 E59F0050        LDR              R0, =vTaskSwitchContext ; Find 
+                                                            the highest priorit
+                                                            y task that
+  112 00000128 E1A0E00F        MOV              LR, PC      ; is ready to run.
+  113 0000012C E12FFF10        BX               R0
+  114 00000130         SkipContextSwitch
+  115 00000130 E3A00001        MOV              R0, #T0MATCHBIT ; Clear the tim
+                                                            er event
+  116 00000134 E59F1048        LDR              R1, =T0IR
+  117 00000138 E5810000        STR              R0, [R1]
+  118 0000013C         
+  119 0000013C E59F0044        LDR              R0, =VICVECTADDR ; Acknowledge 
+                                                            the interrupt
+  120 00000140 E5800000        STR              R0,[R0]
+  121 00000144         
+  122 00000144                 portRESTORE_CONTEXT          ; Restore the conte
+                                                            xt of the highest
+   35 00000144         
+   36 00000144         
+   37 00000144 E59F0028        LDR              R0, =pxCurrentTCB ; Set the LR 
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+                                                            to the task stack. 
+                                                             The location was..
+                                                            .
+   38 00000148 E5900000        LDR              R0, [R0]    ; ... stored in pxC
+                                                            urrentTCB
+   39 0000014C E590E000        LDR              LR, [R0]
+   40 00000150         
+   41 00000150 E59F0020        LDR              R0, =ulCriticalNesting ; The cr
+                                                            itical nesting dept
+                                                            h is the first item
+                                                             on...
+   42 00000154 E8BE0002        LDMFD            LR!, {R1}   ; ...the stack.  Lo
+                                                            ad it into the ulCr
+                                                            iticalNesting var.
+   43 00000158 E5801000        STR              R1, [R0]    ;
+   44 0000015C         
+   45 0000015C E8BE0001        LDMFD            LR!, {R0}   ; Get the SPSR from
+                                                             the stack.
+   46 00000160 E16FF000        MSR              SPSR_cxsf, R0 ;
+   47 00000164         
+   48 00000164 E8DE7FFF        LDMFD            LR, {R0-R14}^ ; Restore all sys
+                                                            tem mode registers 
+                                                            for the task.
+   49 00000168 E1A00000        NOP                          ;
+   50 0000016C         
+   51 0000016C E59EE03C        LDR              LR, [LR, #+60] ; Restore the re
+                                                            turn address
+   52 00000170         
+   53 00000170         ; And return - correcting the offset in the LR to obtain
+                        ...
+   54 00000170 E25EF004        SUBS             PC, LR, #4  ; ...the correct ad
+                                                            dress.
+   55 00000174         
+  123 00000174         ; priority task that is ready to run.
+  124 00000174                 END
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+              E0004000 
+              FFFFF030 
+Command Line: --debug --xref --diag_suppress=9931 --apcs=interwork --depend=.\b
+in\portasm.d -o.\bin\portasm.o -I..\..\Source\portable\RVDS\ARM7_LPC21xx -IC:\K
+eil_v5\ARM\RV31\INC -IC:\Keil_v5\ARM\CMSIS\Include -IC:\Keil_v5\ARM\INC\Philips
+ --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 532" --list=.\
+portasm.lst ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+PORT_ASM 00000000
+
+Symbol: PORT_ASM
+   Definitions
+      At line 45 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      None
+Comment: PORT_ASM unused
+SkipContextSwitch 00000130
+
+Symbol: SkipContextSwitch
+   Definitions
+      At line 114 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 110 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: SkipContextSwitch used once
+vPortStartFirstTask 00000000
+
+Symbol: vPortStartFirstTask
+   Definitions
+      At line 53 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 35 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: vPortStartFirstTask used once
+vPortYield 00000030
+
+Symbol: vPortYield
+   Definitions
+      At line 59 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 37 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: vPortYield used once
+vPortYieldProcessor 00000038
+
+Symbol: vPortYieldProcessor
+   Definitions
+      At line 74 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 34 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: vPortYieldProcessor used once
+vPreemptiveTick 000000C4
+
+Symbol: vPreemptiveTick
+   Definitions
+      At line 99 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 36 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: vPreemptiveTick used once
+6 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+T0IR E0004000
+
+Symbol: T0IR
+   Definitions
+      At line 41 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 116 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: T0IR used once
+T0MATCHBIT 00000001
+
+Symbol: T0MATCHBIT
+   Definitions
+      At line 42 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 115 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: T0MATCHBIT used once
+VICVECTADDR FFFFF030
+
+Symbol: VICVECTADDR
+   Definitions
+      At line 40 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 119 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: VICVECTADDR used once
+3 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+pxCurrentTCB 00000000
+
+Symbol: pxCurrentTCB
+   Definitions
+      At line 30 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portmacro.inc
+   Uses
+      At line 37 in macro portRESTORE_CONTEXT
+      at line 57 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+      At line 86 in macro portSAVE_CONTEXT
+      at line 84 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+
+ulCriticalNesting 00000000
+
+Symbol: ulCriticalNesting
+   Definitions
+      At line 29 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portmacro.inc
+   Uses
+      At line 41 in macro portRESTORE_CONTEXT
+      at line 57 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+      At line 82 in macro portSAVE_CONTEXT
+      at line 84 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+
+vTaskSwitchContext 00000000
+
+Symbol: vTaskSwitchContext
+   Definitions
+      At line 31 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 85 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+      At line 111 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+
+xTaskIncrementTick 00000000
+
+Symbol: xTaskIncrementTick
+   Definitions
+      At line 32 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+   Uses
+      At line 105 in file ..\..\Source\portable\RVDS\ARM7_LPC21xx\portASM.s
+Comment: xTaskIncrementTick used once
+4 symbols
+347 symbols in table
