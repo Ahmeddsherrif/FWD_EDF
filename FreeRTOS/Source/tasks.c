@@ -343,6 +343,15 @@ PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
  * xDelayedTaskList1 and xDelayedTaskList2 could be moved to function scope but
  * doing so breaks some kernel aware debuggers and debuggers that rely on removing
  * the static qualifier. */
+
+
+/* E.C. : the new RedyList */
+
+#if ( configUSE_EDF_SCHEDULER == 1 )
+ PRIVILEGED_DATA static List_t xReadyTasksListEDF; /*< Ready tasks ordered
+by their deadline. */
+#endif
+
 PRIVILEGED_DATA static List_t pxReadyTasksLists[ configMAX_PRIORITIES ]; /*< Prioritised ready tasks. */
 PRIVILEGED_DATA static List_t xDelayedTaskList1;                         /*< Delayed tasks. */
 PRIVILEGED_DATA static List_t xDelayedTaskList2;                         /*< Delayed tasks (two lists are used - one for delays that have overflowed the current tick count. */
@@ -453,6 +462,8 @@ static portTASK_FUNCTION_PROTO( prvIdleTask, pvParameters ) PRIVILEGED_FUNCTION;
     static void prvDeleteTCB( TCB_t * pxTCB ) PRIVILEGED_FUNCTION;
 
 #endif
+
+
 
 /*
  * Used only by the idle task.  This checks to see if anything has been placed
@@ -3675,6 +3686,10 @@ static void prvInitialiseTaskLists( void )
     vListInitialise( &xDelayedTaskList1 );
     vListInitialise( &xDelayedTaskList2 );
     vListInitialise( &xPendingReadyList );
+    
+    #if ( configUSE_EDF_SCHEDULER == 1 )
+        vListInitialise( &xReadyTasksListEDF ); 
+    #endif
 
     #if ( INCLUDE_vTaskDelete == 1 )
         {

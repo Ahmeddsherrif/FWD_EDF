@@ -84,6 +84,29 @@ static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
 
+void vApplicationTickHook(){
+	GPIO_write(PORT_0,PIN5, PIN_IS_HIGH);
+	GPIO_write(PORT_0,PIN5, PIN_IS_LOW);
+	
+	GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+}
+
+void vApplicationIdleHook(){
+		GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+}
+
+void testTask(void *param){
+	
+	for(;;){
+		GPIO_write(PORT_0,PIN0, PIN_IS_HIGH);
+		GPIO_write(PORT_0,PIN0, PIN_IS_LOW);
+		
+		vTaskDelay(20);
+		GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+	}
+}
+
+TaskHandle_t myHandle;
 /*
  * Application entry point:
  * Starts all the other tasks, then starts the scheduler. 
@@ -94,8 +117,15 @@ int main( void )
 	prvSetupHardware();
 
 	
+//	for(;;){
+//		
+//		GPIO_write(PORT_0,PIN5, PIN_IS_HIGH);
+//		GPIO_write(PORT_0,PIN5, PIN_IS_LOW);
+//	}
+//	
     /* Create Tasks here */
 
+	xTaskCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle);
 
 	/* Now all the tasks have been started - start the scheduler.
 
