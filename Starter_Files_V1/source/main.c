@@ -127,6 +127,8 @@ int main( void )
 
 	xTaskCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle);
 	
+//	xTaskPe
+	
 	
 
 	/* Now all the tasks have been started - start the scheduler.

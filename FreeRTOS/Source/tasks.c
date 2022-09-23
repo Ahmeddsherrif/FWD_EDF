@@ -227,7 +227,7 @@
         tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )																																					 
 #else
     #define prvAddTaskToReadyList( pxTCB )                                                               \
-         traceMOVED_TASK_TO_READY_STATE( pxTCB );  \
+        traceMOVED_TASK_TO_READY_STATE( pxTCB );  \
         vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) ); \
         tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )                            
 #endif
@@ -2968,14 +2968,29 @@ BaseType_t xTaskIncrementTick( void )
                              * only be performed if the unblocked task has a
                              * priority that is equal to or higher than the
                              * currently executing task. */
-                            if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
-                            {
-                                xSwitchRequired = pdTRUE;
-                            }
-                            else
-                            {
-                                mtCOVERAGE_TEST_MARKER();
-                            }
+
+                            #if (configUSE_EDF_SCHEDULER == 1)
+                                listSET_LIST_ITEM_VALUE( &( ( pxTCB )->xStateListItem ), (pxTCB)->xTaskPeriod + xConstTickCount);
+                                vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) );
+                                if( pxTCB->xStateListItem.xItemValue < pxCurrentTCB->xStateListItem.xItemValue )
+                                {
+                                    xSwitchRequired = pdTRUE;
+                                }
+                                else
+                                {
+                                    mtCOVERAGE_TEST_MARKER();
+                                }
+                           
+                            #else
+                                if( pxTCB->uxPriority >= pxCurrentTCB->uxPriority )
+                                {
+                                    xSwitchRequired = pdTRUE;
+                                }
+                                else
+                                {
+                                    mtCOVERAGE_TEST_MARKER();
+                                }
+                             #endif /*configUSE_EDF_SCHEDULER*/
                         }
                     #endif /* configUSE_PREEMPTION */
                 }
@@ -3596,6 +3611,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
 
     for( ; ; )
     {
+
         /* See if any tasks have deleted themselves - if so then the idle task
          * is responsible for freeing the deleted task's TCB and stack. */
         prvCheckTasksWaitingTermination();
@@ -3621,10 +3637,23 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                  * the list, and an occasional incorrect value will not matter.  If
                  * the ready list at the idle priority contains more than one task
                  * then a task other than the idle task is ready to execute. */
+                
+                //Change Idel Task Deadline
+                #if (configUSE_EDF_SCHEDULER == 1)
+                    listSET_LIST_ITEM_VALUE( &( ( xIdleTaskHandle )->xStateListItem ), (xIdleTaskHandle)->xTaskPeriod + xTaskGetTickCount());
+                    vListInsert( &(xReadyTasksListEDF), &( ( xIdleTaskHandle )->xStateListItem ) );
+                    if( listCURRENT_LIST_LENGTH( &( xReadyTasksListEDF ) ) > ( UBaseType_t ) 1 )
+                    {
+                        taskYIELD();
+                    }
+                #else
                 if( listCURRENT_LIST_LENGTH( &( pxReadyTasksLists[ tskIDLE_PRIORITY ] ) ) > ( UBaseType_t ) 1 )
                 {
                     taskYIELD();
                 }
+                
+                #endif
+
                 else
                 {
                     mtCOVERAGE_TEST_MARKER();
