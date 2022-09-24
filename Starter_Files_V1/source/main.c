@@ -83,6 +83,16 @@
 static void prvSetupHardware( void );
 /*-----------------------------------------------------------*/
 
+#if ( configUSE_EDF_SCHEDULER == 1 )
+
+    BaseType_t xTaskPeriodicCreate( TaskFunction_t pxTaskCode,
+                            const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+                            const configSTACK_DEPTH_TYPE usStackDepth,
+                            void * const pvParameters,
+                            UBaseType_t uxPriority,
+                            TaskHandle_t * const pxCreatedTask ,
+                            TickType_t period);
+#endif
 
 void vApplicationTickHook(){
 	GPIO_write(PORT_0,PIN5, PIN_IS_HIGH);
@@ -96,12 +106,18 @@ void vApplicationIdleHook(){
 }
 
 void testTask(void *param){
+	TickType_t xLastWakeTime;
+	int  i;
+	xLastWakeTime = xTaskGetTickCount();
 	
 	for(;;){
 		GPIO_write(PORT_0,PIN0, PIN_IS_HIGH);
+		for(i=0; i<100000; i++){
+			i=i;
+		}
 		GPIO_write(PORT_0,PIN0, PIN_IS_LOW);
 		
-		vTaskDelay(20);
+		vTaskDelayUntil( &xLastWakeTime, 20 );
 		GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
 	}
 }
@@ -125,9 +141,18 @@ int main( void )
 //	
     /* Create Tasks here */
 
-	xTaskCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle);
+//xTaskCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle);
+xTaskPeriodicCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle, 20);
 	
-//	xTaskPe
+//xTaskPeriodicCreate(
+//	testTask, 
+//	"first", 
+//	100, 
+//	(void *)NULL, 
+//	1, 
+//	&myHandle, 
+//	10);
+//	
 	
 	
 
