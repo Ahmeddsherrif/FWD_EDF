@@ -94,35 +94,173 @@ static void prvSetupHardware( void );
                             TickType_t period);
 #endif
 
+#define PERIODICITY_TASK_1		10
+#define ET_TASK_1						  2
+														
+#define PERIODICITY_TASK_2		10
+#define ET_TASK_2							2
+														
+#define PERIODICITY_TASK_3		10
+#define ET_TASK_3						  1
+														
+#define PERIODICITY_TASK_4		10
+#define ET_TASK_4							1
+																																								
+#define PERIODICITY_TASK_5		10
+#define ET_TASK_5						  1
+														
+#define PERIODICITY_TASK_6		10
+#define ET_TASK_6							1
+														
+																										
+
+														
+#define ET_2_COUNT_MAP		6666
+#define DUMMY_ET(ET)																									\
+					do{																													\
+							int  i;																									\
+							for(i=0; i<(ET * ET_2_COUNT_MAP); i++){									\
+								i=i;																									\
+							}																												\
+					}while(0)
+					
+//trace macros if ndef
+#define PROBE_PORT		  	PORT_0	
+					
+#define PROBE_TICK				PIN0
+#define PROBE_TASK_1			PIN1
+#define PROBE_TASK_2			PIN2	
+#define PROBE_TASK_3			PIN3
+#define PROBE_TASK_4			PIN4	
+#define PROBE_TASK_5			PIN5
+#define PROBE_TASK_6			PIN6				
+#define PROBE_IDLE				PIN7
+					
+
+					
+					
+#define PULSE_TASK_IN(probe)			GPIO_write(PROBE_PORT,probe, PIN_IS_HIGH)
+#define PULSE_TASK_OUT(probe)			GPIO_write(PROBE_PORT,probe, PIN_IS_LOW)
+		
+					
+#define PULSE_IDLE_IN()						GPIO_write(PROBE_PORT,PROBE_IDLE, PIN_IS_HIGH)
+#define PULSE_IDLE_OUT()					GPIO_write(PROBE_PORT,PROBE_IDLE, PIN_IS_LOW)
+
+#define PULSE_TICK() 																									\
+					do{																													\
+						GPIO_write(PROBE_PORT,PROBE_TICK, PIN_IS_HIGH);						\
+						GPIO_write(PROBE_PORT,PROBE_TICK, PIN_IS_LOW);						\
+					}while(0)	
+
+					
 void vApplicationTickHook(){
-	GPIO_write(PORT_0,PIN5, PIN_IS_HIGH);
-	GPIO_write(PORT_0,PIN5, PIN_IS_LOW);
-	
-	GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+		PULSE_TICK();
 }
 
 void vApplicationIdleHook(){
-		GPIO_write(PORT_0,PIN1, PIN_IS_HIGH);
+		PULSE_IDLE_IN();
 }
 
-void testTask(void *param){
+
+/********************************************** Task 1 **********************/
+void Task_1(void *param){
 	TickType_t xLastWakeTime;
-	int  i;
 	xLastWakeTime = xTaskGetTickCount();
 	
 	for(;;){
-		GPIO_write(PORT_0,PIN0, PIN_IS_HIGH);
-		for(i=0; i<100000; i++){
-			i=i;
-		}
-		GPIO_write(PORT_0,PIN0, PIN_IS_LOW);
+		PULSE_IDLE_OUT();
 		
-		vTaskDelayUntil( &xLastWakeTime, 20 );
-		GPIO_write(PORT_0,PIN1, PIN_IS_LOW);
+		PULSE_TASK_IN(PROBE_TASK_1);	
+		DUMMY_ET(ET_TASK_1);
+		PULSE_TASK_OUT(PROBE_TASK_1);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_1 );
 	}
 }
 
-TaskHandle_t myHandle;
+/********************************************** Task 2 **********************/
+void Task_2(void *param){
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;){
+		PULSE_IDLE_OUT();
+		
+		PULSE_TASK_IN(PROBE_TASK_2);	
+		DUMMY_ET(ET_TASK_2);
+		PULSE_TASK_OUT(PROBE_TASK_2);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2 );
+	}
+}
+
+/********************************************** Task 3 **********************/
+void Task_3(void *param){
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;){
+		PULSE_IDLE_OUT();
+		
+		PULSE_TASK_IN(PROBE_TASK_3);	
+		DUMMY_ET(ET_TASK_3);
+		PULSE_TASK_OUT(PROBE_TASK_3);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_3 );
+	}
+}
+
+/********************************************** Task 4 **********************/
+void Task_4(void *param){
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;){
+		PULSE_IDLE_OUT();
+		
+		PULSE_TASK_IN(PROBE_TASK_4);	
+		DUMMY_ET(ET_TASK_4);
+		PULSE_TASK_OUT(PROBE_TASK_4);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4 );
+	}
+}
+
+
+/********************************************** Task 5 **********************/
+void Task_5(void *param){
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;){
+		PULSE_IDLE_OUT();
+		
+		PULSE_TASK_IN(PROBE_TASK_5);	
+		DUMMY_ET(ET_TASK_5);
+		PULSE_TASK_OUT(PROBE_TASK_5);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_5 );
+	}
+}
+
+
+/********************************************** Task 6 **********************/
+void Task_6(void *param){
+	TickType_t xLastWakeTime;
+	xLastWakeTime = xTaskGetTickCount();
+	
+	for(;;){
+		PULSE_IDLE_OUT();
+		
+		PULSE_TASK_IN(PROBE_TASK_6);	
+		DUMMY_ET(ET_TASK_6);
+		PULSE_TASK_OUT(PROBE_TASK_6);
+		
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_6 );
+	}
+}
+
+
 /*
  * Application entry point:
  * Starts all the other tasks, then starts the scheduler. 
@@ -132,30 +270,63 @@ int main( void )
 	/* Setup the hardware for use with the Keil demo board. */
 	prvSetupHardware();
 
-	
-//	for(;;){
-//		
-//		GPIO_write(PORT_0,PIN5, PIN_IS_HIGH);
-//		GPIO_write(PORT_0,PIN5, PIN_IS_LOW);
-//	}
-//	
-    /* Create Tasks here */
 
-//xTaskCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle);
-xTaskPeriodicCreate(testTask, "first", 100, (void *)NULL, 1, &myHandle, 20);
+xTaskPeriodicCreate(
+	Task_1, 
+	"Button_1_Monitor", 
+	100, 
+	(void *)NULL,
+	0, 
+	NULL, 
+	PERIODICITY_TASK_1);
 	
-//xTaskPeriodicCreate(
-//	testTask, 
-//	"first", 
-//	100, 
-//	(void *)NULL, 
-//	1, 
-//	&myHandle, 
-//	10);
-//	
+xTaskPeriodicCreate(
+	Task_2, 
+	"Button_2_Monitor", 
+	100, 
+	(void *)NULL,
+	0, 
+	NULL, 
+	PERIODICITY_TASK_2);
 	
-	
+xTaskPeriodicCreate(
+	Task_3, 
+	"Periodic_Transmitter", 
+	100, 
+	(void *)NULL,
+	0, 
+	NULL, 
+	PERIODICITY_TASK_3);
 
+	
+	xTaskPeriodicCreate(
+	Task_4, 
+	"Uart_Receiver", 
+	100, 
+	(void *)NULL,
+	0, 
+	NULL, 
+	PERIODICITY_TASK_4);
+	
+xTaskPeriodicCreate(
+	Task_5, 
+	"Load_1_Simulation", 
+	100, 
+	(void *)NULL,
+	0, 
+	NULL, 
+	PERIODICITY_TASK_5);
+	
+xTaskPeriodicCreate(
+	Task_6, 
+	"Load_2_Simulation", 
+	100, 
+	(void *)NULL, 
+	0, 
+	NULL, 
+	PERIODICITY_TASK_6);
+	
+	
 	/* Now all the tasks have been started - start the scheduler.
 
 	NOTE : Tasks run in system mode and the scheduler runs in Supervisor mode.
