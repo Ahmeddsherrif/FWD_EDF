@@ -44,13 +44,20 @@
 #define configUSE_EDF_SCHEDULER         1
 #define configUSE_APPLICATION_TASK_TAG  1
 
-#define traceTASK_SWITCHED_IN()			PULSE_TASK_IN((pinX_t)(pxCurrentTCB->pxTaskTag))
-#define traceTASK_SWITCHED_OUT()		PULSE_TASK_OUT((pinX_t)(pxCurrentTCB->pxTaskTag))
+#define PROBE_PORT		  	PORT_0	
+#define PROBE_TICK				PIN0
+#define PROBE_TASK_1			PIN1
+#define PROBE_TASK_2			PIN2	
+#define PROBE_TASK_3			PIN3
+#define PROBE_TASK_4			PIN4	
+#define PROBE_TASK_5			PIN5
+#define PROBE_TASK_6			PIN6				
+#define PROBE_IDLE				PIN7
+
+#define traceTASK_SWITCHED_IN()			GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_HIGH)
+#define traceTASK_SWITCHED_OUT()		GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_LOW)
 
 
-#define PROBE_PORT		  					PORT_0	
-#define PULSE_TASK_IN(probe)			GPIO_write(PROBE_PORT, probe, PIN_IS_HIGH)
-#define PULSE_TASK_OUT(probe)			GPIO_write(PROBE_PORT, probe, PIN_IS_LOW)
 
 #define configSUPPORT_DYNAMIC_ALLOCATION 		1
 

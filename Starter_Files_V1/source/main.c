@@ -136,14 +136,7 @@ static void prvSetupHardware( void );
 //trace macros if ndef
 
 					
-#define PROBE_TICK				PIN0
-#define PROBE_TASK_1			PIN1
-#define PROBE_TASK_2			PIN2	
-#define PROBE_TASK_3			PIN3
-#define PROBE_TASK_4			PIN4	
-#define PROBE_TASK_5			PIN5
-#define PROBE_TASK_6			PIN6				
-#define PROBE_IDLE				PIN7
+
 					
 
 					
@@ -310,9 +303,9 @@ void vApplicationIdleHook(void){
 void Task_1(void *param){
 	TickType_t xLastWakeTime;
 	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
-	message_t xMessegeToSend;
+//	message_t xMessegeToSend;
 	
-	xMessegeToSend.ucMessageID = '1';
+//	xMessegeToSend.ucMessageID = '1';
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
