@@ -220,18 +220,21 @@
  */
 // $$ Change #3
 #if (configUSE_EDF_SCHEDULER == 1)
-    #define prvAddTaskToReadyList( pxTCB )                                                                 \
-        traceMOVED_TASK_TO_READY_STATE( pxTCB );                                                           \
-        taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                \
-        listINSERT_END( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
-        tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )																																					 
+	#define prvAddTaskToReadyList( pxTCB )                                                               \
+	traceMOVED_TASK_TO_READY_STATE( pxTCB );  \
+	vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) ); \
+	tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )   										
+		
 #else
-    #define prvAddTaskToReadyList( pxTCB )                                                               \
-        traceMOVED_TASK_TO_READY_STATE( pxTCB );  \
-        vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) ); \
-        tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )                            
+		
+	#define prvAddTaskToReadyList( pxTCB )                                                              \
+	traceMOVED_TASK_TO_READY_STATE( pxTCB );                                                           \
+	taskRECORD_READY_PRIORITY( ( pxTCB )->uxPriority );                                                \
+	listINSERT_END( &( pxReadyTasksLists[ ( pxTCB )->uxPriority ] ), &( ( pxTCB )->xStateListItem ) ); \
+	tracePOST_MOVED_TASK_TO_READY_STATE( pxTCB )	
+	
 #endif
-
+   
 /*-----------------------------------------------------------*/
 
 /*
@@ -924,8 +927,9 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
             pxNewTCB->xTaskPeriod = period;
+						listSET_LIST_ITEM_VALUE( &( ( pxNewTCB )->xStateListItem ), (pxNewTCB)->xTaskPeriod + xTaskGetTickCount());
+					
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
-            listSET_LIST_ITEM_VALUE( &( ( pxNewTCB )->xStateListItem ), (pxNewTCB)->xTaskPeriod + xTaskGetTickCount());
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;
         }
@@ -2971,7 +2975,7 @@ BaseType_t xTaskIncrementTick( void )
 
                             #if (configUSE_EDF_SCHEDULER == 1)
                                 listSET_LIST_ITEM_VALUE( &( ( pxTCB )->xStateListItem ), (pxTCB)->xTaskPeriod + xConstTickCount);
-                                vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) );
+                               // vListInsert( &(xReadyTasksListEDF), &( ( pxTCB )->xStateListItem ) );
                                 if( pxTCB->xStateListItem.xItemValue < pxCurrentTCB->xStateListItem.xItemValue )
                                 {
                                     xSwitchRequired = pdTRUE;
@@ -3641,7 +3645,7 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
                 //Change Idel Task Deadline
                 #if (configUSE_EDF_SCHEDULER == 1)
                     listSET_LIST_ITEM_VALUE( &( ( xIdleTaskHandle )->xStateListItem ), (xIdleTaskHandle)->xTaskPeriod + xTaskGetTickCount());
-                    vListInsert( &(xReadyTasksListEDF), &( ( xIdleTaskHandle )->xStateListItem ) );
+                    //vListInsert( &(xReadyTasksListEDF), &( ( xIdleTaskHandle )->xStateListItem ) );
                     if( listCURRENT_LIST_LENGTH( &( xReadyTasksListEDF ) ) > ( UBaseType_t ) 1 )
                     {
                         taskYIELD();
