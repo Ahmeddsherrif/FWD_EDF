@@ -55,12 +55,14 @@
 /* Standard includes. */
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "lpc21xx.h"
 
 /* Peripheral includes. */
@@ -156,106 +158,37 @@ static void prvSetupHardware( void );
 					}while(0)	
 
 
-					
-void vApplicationTickHook(){
-		PULSE_TICK();
-}
-
-//void vApplicationIdleTAG_SET(){
-//	vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
-//}
-
-void vApplicationIdleHook(){
-	
-}
-
-
-/********************************************** Task 1 **********************/
-void Task_1(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
-	
-	for(;;){
-		DUMMY_ET(ET_TASK_1);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_1 );
-	}
-}
-
-/********************************************** Task 2 **********************/
-void Task_2(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_2);
-	
-	for(;;){
-		DUMMY_ET(ET_TASK_2);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2 );
-	}
-}
-
-/********************************************** Task 3 **********************/
-void Task_3(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_3);
-	
-	for(;;){
-		DUMMY_ET(ET_TASK_3);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_3 );
-	}
-}
-
-/********************************************** Task 4 **********************/
-void Task_4(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_4);
-	
-	for(;;){
-		DUMMY_ET(ET_TASK_4);	
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4 );
-	}
-}
-
-
-/********************************************** Task 5 **********************/
-void Task_5(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_5);
-	
-	for(;;){
-		DUMMY_ET(ET_TASK_5);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_5 );
-	}
-}
-
-
-/********************************************** Task 6 **********************/
-void Task_6(void *param){
-	TickType_t xLastWakeTime;
-	xLastWakeTime = xTaskGetTickCount();
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_6);
-	
-	for(;;){	
-		DUMMY_ET(ET_TASK_6);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_6 );
-	}
-}
-
+void Task_1(void *param);
+void Task_2(void *param);
+void Task_3(void *param);
+void Task_4(void *param);
+void Task_5(void *param);
+void Task_6(void *param);
+void vApplicationTickHook(void);
+void vApplicationIdleHook(void);
 
 /*
  * Application entry point:
  * Starts all the other tasks, then starts the scheduler. 
  */
+
+typedef struct{
+		uint8_t ucMessageID;
+		uint8_t ucData[20];
+}message_t;
+
+
+QueueHandle_t xQueueConsumer;
+
 int main( void )
 {
 	/* Setup the hardware for use with the Keil demo board. */
 	prvSetupHardware();
 
 
-xTaskPeriodicCreate(
+xQueueConsumer = xQueueCreate( 10, sizeof( message_t ) );
+
+	xTaskPeriodicCreate(
 	Task_1, 
 	"Button_1_Monitor", 
 	100, 
@@ -359,4 +292,106 @@ static void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
+					
+void vApplicationTickHook(void){
+		PULSE_TICK();
+}
+
+//void vApplicationIdleTAG_SET(){
+//	vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
+//}
+
+void vApplicationIdleHook(void){
+	
+}
+
+
+/********************************************** Task 1 **********************/
+void Task_1(void *param){
+	TickType_t xLastWakeTime;
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
+	message_t xMessegeToSend;
+	
+	xMessegeToSend.ucMessageID = '1';
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){
+		DUMMY_ET(ET_TASK_1);
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_1 );
+	}
+}
+
+/********************************************** Task 2 **********************/
+void Task_2(void *param){
+	TickType_t xLastWakeTime;
+	
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_2);
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){
+		DUMMY_ET(ET_TASK_2);
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2 );
+	}
+}
+
+/********************************************** Task 3 **********************/
+void Task_3(void *param){
+	TickType_t xLastWakeTime;
+	
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_3);
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){
+		DUMMY_ET(ET_TASK_3);
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_3 );
+	}
+}
+
+/********************************************** Task 4 **********************/
+void Task_4(void *param){
+	TickType_t xLastWakeTime;
+	message_t xMessageBuffer;
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_4);
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){
+		DUMMY_ET(ET_TASK_4);
+//			if( xQueueReceive( xQueueConsumer,
+//                         &( xMessageBuffer ),
+//                         ( TickType_t ) 10 ) == pdPASS )
+//      {
+//         // uart_send( "Message ID = ");
+//				 // uart_send(xMessageBuffer.ucMessageID);
+//				 // uart_send( "Message Data = ");
+//				 // uart_send(xMessageBuffer.ucData);
+//      }
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4 );
+	}
+}
+
+
+/********************************************** Task 5 **********************/
+void Task_5(void *param){
+	TickType_t xLastWakeTime;
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_5);
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){
+		DUMMY_ET(ET_TASK_5);
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_5 );
+	}
+}
+
+
+/********************************************** Task 6 **********************/
+void Task_6(void *param){
+	TickType_t xLastWakeTime;
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_6);
+	
+	xLastWakeTime = xTaskGetTickCount();
+	for(;;){	
+		DUMMY_ET(ET_TASK_6);
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_6 );
+	}
+}
 
