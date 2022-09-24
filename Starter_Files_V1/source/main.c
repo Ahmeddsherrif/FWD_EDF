@@ -56,6 +56,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+
+
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -94,23 +96,28 @@ static void prvSetupHardware( void );
                             TickType_t period);
 #endif
 
-#define PERIODICITY_TASK_1		10
-#define ET_TASK_1						  2
+
+
+
+
+
+#define PERIODICITY_TASK_1		50
+#define ET_TASK_1						  6
 														
-#define PERIODICITY_TASK_2		10
+#define PERIODICITY_TASK_2		50
 #define ET_TASK_2							2
 														
-#define PERIODICITY_TASK_3		10
-#define ET_TASK_3						  1
+#define PERIODICITY_TASK_3		100
+#define ET_TASK_3						  5
 														
-#define PERIODICITY_TASK_4		10
+#define PERIODICITY_TASK_4		20
 #define ET_TASK_4							1
 																																								
 #define PERIODICITY_TASK_5		10
-#define ET_TASK_5						  1
+#define ET_TASK_5						  5
 														
-#define PERIODICITY_TASK_6		10
-#define ET_TASK_6							1
+#define PERIODICITY_TASK_6		100
+#define ET_TASK_6							12
 														
 																										
 
@@ -125,7 +132,7 @@ static void prvSetupHardware( void );
 					}while(0)
 					
 //trace macros if ndef
-#define PROBE_PORT		  	PORT_0	
+
 					
 #define PROBE_TICK				PIN0
 #define PROBE_TASK_1			PIN1
@@ -139,26 +146,27 @@ static void prvSetupHardware( void );
 
 					
 					
-#define PULSE_TASK_IN(probe)			GPIO_write(PROBE_PORT,probe, PIN_IS_HIGH)
-#define PULSE_TASK_OUT(probe)			GPIO_write(PROBE_PORT,probe, PIN_IS_LOW)
+
 		
-					
-#define PULSE_IDLE_IN()						GPIO_write(PROBE_PORT,PROBE_IDLE, PIN_IS_HIGH)
-#define PULSE_IDLE_OUT()					GPIO_write(PROBE_PORT,PROBE_IDLE, PIN_IS_LOW)
 
 #define PULSE_TICK() 																									\
 					do{																													\
-						GPIO_write(PROBE_PORT,PROBE_TICK, PIN_IS_HIGH);						\
-						GPIO_write(PROBE_PORT,PROBE_TICK, PIN_IS_LOW);						\
+						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_HIGH);						\
+						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_LOW);							\
 					}while(0)	
+
 
 					
 void vApplicationTickHook(){
 		PULSE_TICK();
 }
 
+//void vApplicationIdleTAG_SET(){
+//	vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
+//}
+
 void vApplicationIdleHook(){
-		PULSE_IDLE_IN();
+	
 }
 
 
@@ -166,14 +174,10 @@ void vApplicationIdleHook(){
 void Task_1(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
 	
 	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_1);	
 		DUMMY_ET(ET_TASK_1);
-		PULSE_TASK_OUT(PROBE_TASK_1);
-		
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_1 );
 	}
 }
@@ -182,14 +186,10 @@ void Task_1(void *param){
 void Task_2(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_2);
 	
 	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_2);	
 		DUMMY_ET(ET_TASK_2);
-		PULSE_TASK_OUT(PROBE_TASK_2);
-		
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2 );
 	}
 }
@@ -198,14 +198,10 @@ void Task_2(void *param){
 void Task_3(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_3);
 	
 	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_3);	
 		DUMMY_ET(ET_TASK_3);
-		PULSE_TASK_OUT(PROBE_TASK_3);
-		
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_3 );
 	}
 }
@@ -214,14 +210,10 @@ void Task_3(void *param){
 void Task_4(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_4);
 	
 	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_4);	
-		DUMMY_ET(ET_TASK_4);
-		PULSE_TASK_OUT(PROBE_TASK_4);
-		
+		DUMMY_ET(ET_TASK_4);	
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4 );
 	}
 }
@@ -231,14 +223,10 @@ void Task_4(void *param){
 void Task_5(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_5);
 	
 	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_5);	
 		DUMMY_ET(ET_TASK_5);
-		PULSE_TASK_OUT(PROBE_TASK_5);
-		
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_5 );
 	}
 }
@@ -248,14 +236,10 @@ void Task_5(void *param){
 void Task_6(void *param){
 	TickType_t xLastWakeTime;
 	xLastWakeTime = xTaskGetTickCount();
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_6);
 	
-	for(;;){
-		PULSE_IDLE_OUT();
-		
-		PULSE_TASK_IN(PROBE_TASK_6);	
+	for(;;){	
 		DUMMY_ET(ET_TASK_6);
-		PULSE_TASK_OUT(PROBE_TASK_6);
-		
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_6 );
 	}
 }

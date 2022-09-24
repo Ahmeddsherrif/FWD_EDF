@@ -41,6 +41,9 @@
 #include "timers.h"
 #include "stack_macros.h"
 
+
+#include "GPIO.h"
+
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
  * for the header files above, but not in this file, in order to generate the
@@ -345,6 +348,10 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     //$$ Change 4
     #if (configUSE_EDF_SCHEDULER == 1)
         TickType_t xTaskPeriod;
+    #endif
+
+    #if (plotUSE_PROBE == 1)
+        uint8_t ucProbe;
     #endif
 
 } tskTCB;
@@ -3612,6 +3619,11 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
      * the idle task is responsible for deleting the task's secure context, if
      * any. */
     portALLOCATE_SECURE_CONTEXT( configMINIMAL_SECURE_STACK_SIZE );
+
+//    #if (configUSE_APPLICATION_TASK_TAG == 1)
+//        extern void vApplicationIdleTAG_SET( void );
+//        vApplicationIdleTAGs_SET();
+//    #endif
 
     for( ; ; )
     {

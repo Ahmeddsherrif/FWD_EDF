@@ -41,7 +41,17 @@
  *
  * See http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
-#define configUSE_EDF_SCHEDULER     1
+#define configUSE_EDF_SCHEDULER         1
+#define configUSE_APPLICATION_TASK_TAG  1
+
+#define traceTASK_SWITCHED_IN()			PULSE_TASK_IN((pinX_t)(pxCurrentTCB->pxTaskTag))
+#define traceTASK_SWITCHED_OUT()		PULSE_TASK_OUT((pinX_t)(pxCurrentTCB->pxTaskTag))
+
+
+#define PROBE_PORT		  	PORT_0	
+#define PULSE_TASK_IN(probe)			GPIO_write(PROBE_PORT, probe, PIN_IS_HIGH)
+#define PULSE_TASK_OUT(probe)			GPIO_write(PROBE_PORT, probe, PIN_IS_LOW)
+
 
 #define configUSE_PREEMPTION		1
 #define configUSE_IDLE_HOOK			1
