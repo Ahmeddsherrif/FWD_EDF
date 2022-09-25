@@ -58,8 +58,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-
-
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
@@ -71,7 +69,47 @@
 #include "GPIO.h"
 
 
-/*-----------------------------------------------------------*/
+#define NUMBER_OF_TASKS				((uint8_t)6)	
+						
+#define PROBE_TICK						PIN0
+#define PROBE_TASK_1					PIN1
+#define PROBE_TASK_2					PIN2	
+#define PROBE_TASK_3					PIN3
+#define PROBE_TASK_4					PIN4	
+#define PROBE_TASK_5					PIN5
+#define PROBE_TASK_6					PIN6				
+#define PROBE_IDLE						PIN7
+														
+#define PERIODICITY_TASK_1		((uint8_t)50)													
+#define PERIODICITY_TASK_2		((uint8_t)50)													
+#define PERIODICITY_TASK_3		((uint8_t)100)													
+#define PERIODICITY_TASK_4		((uint8_t)20)																																						
+#define PERIODICITY_TASK_5		((uint8_t)10)
+#define PERIODICITY_TASK_6		((uint8_t)100)
+														
+#define ET_TASK_5						  ((uint8_t)5)
+#define ET_TASK_6							((uint8_t)12)														
+														
+#define ET_2_COUNT_MAP				((uint16_t)6666)
+#define DUMMY_ET(ET)																									\
+					do{																													\
+							uint32_t  i;																						\
+							for(i=0; i<(ET * ET_2_COUNT_MAP); i++){									\
+								i=i;																									\
+							}																												\
+					}while(0)
+
+					
+					
+#define MAX_QUEUE_WAIT_TIME 		((uint8_t)5)
+#define QUEUE_LENGTH						((uint8_t)10)	
+#define MESSAGE_BUFFER_SIZE			((uint8_t)25)
+
+#define PULSE_TICK() 																										\
+					do{																														\
+						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_HIGH);						\
+						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_LOW);							\
+					}while(0)	
 
 /* Constants to setup I/O and processor. */
 #define mainBUS_CLK_FULL	( ( unsigned char ) 0x01 )
@@ -80,103 +118,11 @@
 #define mainCOM_TEST_BAUD_RATE	( ( unsigned long ) 115200 )
 
 
-/*
- * Configure the processor for use with the Keil demo board.  This is very
- * minimal as most of the setup is managed by the settings in the project
- * file.
- */
-static void prvSetupHardware( void );
-/*-----------------------------------------------------------*/
-
-#if ( configUSE_EDF_SCHEDULER == 1 )
-
-    BaseType_t xTaskPeriodicCreate( TaskFunction_t pxTaskCode,
-                            const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-                            const configSTACK_DEPTH_TYPE usStackDepth,
-                            void * const pvParameters,
-                            UBaseType_t uxPriority,
-                            TaskHandle_t * const pxCreatedTask ,
-                            TickType_t period);
-#endif
-
-
-
-
-
-
-#define PERIODICITY_TASK_1		50
-//#define ET_TASK_1						  6
-														
-#define PERIODICITY_TASK_2		50
-//#define ET_TASK_2							2
-														
-#define PERIODICITY_TASK_3		100
-//#define ET_TASK_3						  5
-														
-#define PERIODICITY_TASK_4		20
-//#define ET_TASK_4							1
-																																								
-#define PERIODICITY_TASK_5		10
-#define ET_TASK_5						  5
-														
-#define PERIODICITY_TASK_6		100
-#define ET_TASK_6							12
-														
-																										
-
-														
-#define ET_2_COUNT_MAP		6666
-#define DUMMY_ET(ET)																									\
-					do{																													\
-							int  i;																									\
-							for(i=0; i<(ET * ET_2_COUNT_MAP); i++){									\
-								i=i;																									\
-							}																												\
-					}while(0)
-					
-//trace macros if ndef
-
-					
-#define PROBE_TICK				PIN0
-#define PROBE_TASK_1			PIN1
-#define PROBE_TASK_2			PIN2	
-#define PROBE_TASK_3			PIN3
-#define PROBE_TASK_4			PIN4	
-#define PROBE_TASK_5			PIN5
-#define PROBE_TASK_6			PIN6				
-#define PROBE_IDLE				PIN7
-					
-
-					
-					
-#define MAX_QUEUE_WAIT_TIME 		5
-#define MESSAGE_BUFFER_SIZE			25
-
-#define PULSE_TICK() 																									\
-					do{																													\
-						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_HIGH);						\
-						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_LOW);							\
-					}while(0)	
-
-
-void Task_1(void *param);
-void Task_2(void *param);
-void Task_3(void *param);
-void Task_4(void *param);
-void Task_5(void *param);
-void Task_6(void *param);
-void vApplicationTickHook(void);
-void vApplicationIdleHook(void);
-
-/*
- * Application entry point:
- * Starts all the other tasks, then starts the scheduler. 
- */
-
 typedef struct{
-		uint8_t ucMessageID;
-		uint8_t ucData[MESSAGE_BUFFER_SIZE];
-}message_t;
+	uint32_t inTime;
+	uint32_t outTime;
+	uint32_t totalTime;
+}TaskTime_t;
 
 typedef enum{
 	RISING,
@@ -184,20 +130,54 @@ typedef enum{
 	NO_CHANGE
 }buttonEdge_t;
 
+typedef struct{
+		uint8_t ucMessageID;
+		uint8_t ucData[MESSAGE_BUFFER_SIZE];
+}message_t;
+
+
 
 QueueHandle_t xQueueConsumer;
+
+struct{
+	TaskTime_t taskTime[NUMBER_OF_TASKS];
+	uint32_t systemTime;
+	uint32_t cpu_load;
+}performanceEvaluation;
+
+void Task_1(void *param);
+void Task_2(void *param);
+void Task_3(void *param);
+void Task_4(void *param);
+void Task_5(void *param);
+void Task_6(void *param);
+
+void vApplicationTickHook(void);
+void Intialize_TaskTime(TaskTime_t * inputTaskTime);
+static void prvSetupHardware( void );
+
+#if ( configUSE_EDF_SCHEDULER == 1 )
+	BaseType_t xTaskPeriodicCreate( TaskFunction_t pxTaskCode,
+													const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
+													const configSTACK_DEPTH_TYPE usStackDepth,
+													void * const pvParameters,
+													UBaseType_t uxPriority,
+													TaskHandle_t * const pxCreatedTask ,
+													TickType_t period);
+#endif
 
 int main( void )
 {
 	/* Setup the hardware for use with the Keil demo board. */
 	prvSetupHardware();
+	Intialize_TaskTime(performanceEvaluation.taskTime);
 	
-	xQueueConsumer = xQueueCreate( 10, sizeof( message_t ) );
+	xQueueConsumer = xQueueCreate( QUEUE_LENGTH, sizeof( message_t ) );
 
 	xTaskPeriodicCreate(
 	Task_1, 
 	"Button_1_Monitor", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL,
 	0, 
 	NULL, 
@@ -206,7 +186,7 @@ int main( void )
 xTaskPeriodicCreate(
 	Task_2, 
 	"Button_2_Monitor", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL,
 	0, 
 	NULL, 
@@ -215,7 +195,7 @@ xTaskPeriodicCreate(
 xTaskPeriodicCreate(
 	Task_3, 
 	"Periodic_Transmitter", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL,
 	0, 
 	NULL, 
@@ -225,7 +205,7 @@ xTaskPeriodicCreate(
 	xTaskPeriodicCreate(
 	Task_4, 
 	"Uart_Receiver", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL,
 	0, 
 	NULL, 
@@ -234,7 +214,7 @@ xTaskPeriodicCreate(
 xTaskPeriodicCreate(
 	Task_5, 
 	"Load_1_Simulation", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL,
 	0, 
 	NULL, 
@@ -243,7 +223,7 @@ xTaskPeriodicCreate(
 xTaskPeriodicCreate(
 	Task_6, 
 	"Load_2_Simulation", 
-	100, 
+	configMINIMAL_STACK_SIZE, 
 	(void *)NULL, 
 	0, 
 	NULL, 
@@ -298,17 +278,18 @@ static void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
+
+void Intialize_TaskTime(TaskTime_t * inputTaskTime){
+	uint8_t i;
+	for(i = 0; i<NUMBER_OF_TASKS; i++){
+		(inputTaskTime + i)->inTime = 0;
+		(inputTaskTime + i)->outTime = 0;
+		(inputTaskTime + i)->totalTime = 0;
+	}
+}
 					
 void vApplicationTickHook(void){
 		PULSE_TICK();
-}
-
-//void vApplicationIdleTAG_SET(){
-//	vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
-//}
-
-void vApplicationIdleHook(void){
-	
 }
 
 

@@ -3620,10 +3620,9 @@ static portTASK_FUNCTION( prvIdleTask, pvParameters )
      * any. */
     portALLOCATE_SECURE_CONTEXT( configMINIMAL_SECURE_STACK_SIZE );
 
-//    #if (configUSE_APPLICATION_TASK_TAG == 1)
-//        extern void vApplicationIdleTAG_SET( void );
-//        vApplicationIdleTAGs_SET();
-//    #endif
+    #if (configUSE_APPLICATION_TASK_TAG == 1)
+        vApplicationIdleTAG_SET();
+    #endif
 
     for( ; ; )
     {

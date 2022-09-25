@@ -57,12 +57,14 @@
 #define traceTASK_SWITCHED_IN()			GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_HIGH)
 #define traceTASK_SWITCHED_OUT()		GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_LOW)
 
+#define vApplicationIdleTAG_SET()		vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
+
 
 
 #define configSUPPORT_DYNAMIC_ALLOCATION 		1
 
 #define configUSE_PREEMPTION		1
-#define configUSE_IDLE_HOOK			1
+#define configUSE_IDLE_HOOK			0
 #define configUSE_TICK_HOOK			1
 #define configCPU_CLOCK_HZ			( ( unsigned long ) 60000000 )	/* =12.0MHz xtal multiplied by 5 using the PLL. */
 #define configTICK_RATE_HZ			( ( TickType_t ) 1000 )
