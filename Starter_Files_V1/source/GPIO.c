@@ -2,10 +2,21 @@
 
 #include <stdint.h>
 #include "bit_math.h"
+#include "main.h"
 #include "GPIO.h"
 #include "GPIO_cfg.h"
 #include "lpc21xx.h"
 
+
+static const pinX_t tagToPinMap[NUMBER_OF_TASKS + 1] = {
+		PROBE_IDLE,							//idleTask
+		PROBE_TASK_1,						//Task1
+		PROBE_TASK_2,						//Task2
+		PROBE_TASK_3,						//Task3
+		PROBE_TASK_4,						//Task4
+		PROBE_TASK_5,						//Task5
+		PROBE_TASK_6						//Task6
+};
 
 void GPIO_init(void)
 {
@@ -107,4 +118,8 @@ void GPIO_write(portX_t portName, pinX_t pinNum, pinState_t pinState)
 				
 			}
 	}
+}
+
+pinX_t TagToPinMap (uint8_t taskTag){
+	return tagToPinMap[taskTag];
 }

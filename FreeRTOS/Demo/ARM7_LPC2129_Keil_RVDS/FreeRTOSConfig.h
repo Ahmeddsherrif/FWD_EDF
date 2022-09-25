@@ -43,6 +43,7 @@
  *----------------------------------------------------------*/
 #define configUSE_EDF_SCHEDULER         1
 #define configUSE_APPLICATION_TASK_TAG  1
+#define PERFORMANCE_EVALUATION					1
 
 #define PROBE_PORT		  	PORT_0	
 #define PROBE_TICK				PIN0
@@ -54,17 +55,35 @@
 #define PROBE_TASK_6			PIN6				
 #define PROBE_IDLE				PIN7
 
-#define traceTASK_SWITCHED_IN()			GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_HIGH)
-#define traceTASK_SWITCHED_OUT()		GPIO_write(PROBE_PORT, ((pinX_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_LOW)
 
-#define vApplicationIdleTAG_SET()		vTaskSetApplicationTaskTag(NULL, (void *)PROBE_IDLE);
+#if (PERFORMANCE_EVALUATION == 1)	
+	#define traceTASK_SWITCHED_IN()																																		\
+		do{																																															\
+				GPIO_write(PROBE_PORT, TagToPinMap((uint8_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_HIGH);				\
+				performanceEvaluation.taskTime[(uint8_t)(pxCurrentTCB->pxTaskTag)].inTime = T1TC;						\
+		}while(0)
+
+	#define traceTASK_SWITCHED_OUT()																																	\
+		do{																																															\
+				GPIO_write(PROBE_PORT, TagToPinMap((uint8_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_LOW);				\
+				performanceEvaluation.taskTime[(uint8_t)(pxCurrentTCB->pxTaskTag)].totalTime += 						\
+								T1TC - performanceEvaluation.taskTime[(uint8_t)(pxCurrentTCB->pxTaskTag)].inTime;  	\
+		}while(0)
+	
+#else
+		#define traceTASK_SWITCHED_IN()	  	GPIO_write(PROBE_PORT, TagToPinMap((uint8_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_HIGH)
+		#define traceTASK_SWITCHED_OUT()    GPIO_write(PROBE_PORT, TagToPinMap((uint8_t)(pxCurrentTCB->pxTaskTag)), PIN_IS_LOW)
+#endif
+
+		
+#define vApplicationIdleTAG_SET()		vTaskSetApplicationTaskTag(NULL, (void *)0);
 
 
 
 #define configSUPPORT_DYNAMIC_ALLOCATION 		1
 
 #define configUSE_PREEMPTION		1
-#define configUSE_IDLE_HOOK			0
+#define configUSE_IDLE_HOOK			1
 #define configUSE_TICK_HOOK			1
 #define configCPU_CLOCK_HZ			( ( unsigned long ) 60000000 )	/* =12.0MHz xtal multiplied by 5 using the PLL. */
 #define configTICK_RATE_HZ			( ( TickType_t ) 1000 )

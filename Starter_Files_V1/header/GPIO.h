@@ -4,6 +4,7 @@
 #define GPIO_H_
 
 /************* Type def section ************/
+#include <stdint.h>
 
 /* Port data type */
 typedef enum
@@ -55,6 +56,7 @@ typedef enum
 extern void GPIO_init(void);
 extern pinState_t GPIO_read(portX_t PortName, pinX_t pinNum);
 extern void GPIO_write(portX_t PortName, pinX_t PinNum, pinState_t pinState);
+pinX_t TagToPinMap (uint8_t taskTag);
 
 
 

@@ -16,5 +16,6 @@
 .\bin\main.o: ..\..\Source\include\task.h
 .\bin\main.o: ..\..\Source\include\list.h
 .\bin\main.o: ..\..\Source\include\queue.h
+.\bin\main.o: ..\..\..\Starter_Files_V1\header\main.h
 .\bin\main.o: ..\..\..\Starter_Files_V1\header\serial.h
 .\bin\main.o: ..\..\..\Starter_Files_V1\header\GPIO.h

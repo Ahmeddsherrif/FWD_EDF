@@ -41,8 +41,11 @@
 #include "timers.h"
 #include "stack_macros.h"
 
-
+#include "main.h"
 #include "GPIO.h"
+
+extern performanceEvaluation_t performanceEvaluation;
+
 
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be defined
@@ -348,10 +351,6 @@ typedef struct tskTaskControlBlock       /* The old naming convention is used to
     //$$ Change 4
     #if (configUSE_EDF_SCHEDULER == 1)
         TickType_t xTaskPeriod;
-    #endif
-
-    #if (plotUSE_PROBE == 1)
-        uint8_t ucProbe;
     #endif
 
 } tskTCB;
@@ -934,8 +933,8 @@ static void prvAddNewTaskToReadyList( TCB_t * pxNewTCB ) PRIVILEGED_FUNCTION;
             #endif /* tskSTATIC_AND_DYNAMIC_ALLOCATION_POSSIBLE */
 
             pxNewTCB->xTaskPeriod = period;
-						listSET_LIST_ITEM_VALUE( &( ( pxNewTCB )->xStateListItem ), (pxNewTCB)->xTaskPeriod + xTaskGetTickCount());
 					
+						listSET_LIST_ITEM_VALUE( &( ( pxNewTCB )->xStateListItem ), (pxNewTCB)->xTaskPeriod + xTaskGetTickCount());
             prvInitialiseNewTask( pxTaskCode, pcName, ( uint32_t ) usStackDepth, pvParameters, uxPriority, pxCreatedTask, pxNewTCB, NULL );
             prvAddNewTaskToReadyList( pxNewTCB );
             xReturn = pdPASS;

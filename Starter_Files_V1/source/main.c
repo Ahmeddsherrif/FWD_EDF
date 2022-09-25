@@ -65,169 +65,78 @@
 #include "lpc21xx.h"
 
 /* Peripheral includes. */
+#include "main.h"
 #include "serial.h"
 #include "GPIO.h"
 
 
-#define NUMBER_OF_TASKS				((uint8_t)6)	
-						
-#define PROBE_TICK						PIN0
-#define PROBE_TASK_1					PIN1
-#define PROBE_TASK_2					PIN2	
-#define PROBE_TASK_3					PIN3
-#define PROBE_TASK_4					PIN4	
-#define PROBE_TASK_5					PIN5
-#define PROBE_TASK_6					PIN6				
-#define PROBE_IDLE						PIN7
-														
-#define PERIODICITY_TASK_1		((uint8_t)50)													
-#define PERIODICITY_TASK_2		((uint8_t)50)													
-#define PERIODICITY_TASK_3		((uint8_t)100)													
-#define PERIODICITY_TASK_4		((uint8_t)20)																																						
-#define PERIODICITY_TASK_5		((uint8_t)10)
-#define PERIODICITY_TASK_6		((uint8_t)100)
-														
-#define ET_TASK_5						  ((uint8_t)5)
-#define ET_TASK_6							((uint8_t)12)														
-														
-#define ET_2_COUNT_MAP				((uint16_t)6666)
-#define DUMMY_ET(ET)																									\
-					do{																													\
-							uint32_t  i;																						\
-							for(i=0; i<(ET * ET_2_COUNT_MAP); i++){									\
-								i=i;																									\
-							}																												\
-					}while(0)
-
-					
-					
-#define MAX_QUEUE_WAIT_TIME 		((uint8_t)5)
-#define QUEUE_LENGTH						((uint8_t)10)	
-#define MESSAGE_BUFFER_SIZE			((uint8_t)25)
-
-#define PULSE_TICK() 																										\
-					do{																														\
-						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_HIGH);						\
-						GPIO_write(PROBE_PORT, PROBE_TICK, PIN_IS_LOW);							\
-					}while(0)	
-
-/* Constants to setup I/O and processor. */
-#define mainBUS_CLK_FULL	( ( unsigned char ) 0x01 )
-
-/* Constants for the ComTest demo application tasks. */
-#define mainCOM_TEST_BAUD_RATE	( ( unsigned long ) 115200 )
-
-
-typedef struct{
-	uint32_t inTime;
-	uint32_t outTime;
-	uint32_t totalTime;
-}TaskTime_t;
-
-typedef enum{
-	RISING,
-	FALLING,
-	NO_CHANGE
-}buttonEdge_t;
-
-typedef struct{
-		uint8_t ucMessageID;
-		uint8_t ucData[MESSAGE_BUFFER_SIZE];
-}message_t;
-
-
-
+													
+performanceEvaluation_t performanceEvaluation;
 QueueHandle_t xQueueConsumer;
+uint8_t i;
 
-struct{
-	TaskTime_t taskTime[NUMBER_OF_TASKS];
-	uint32_t systemTime;
-	uint32_t cpu_load;
-}performanceEvaluation;
-
-void Task_1(void *param);
-void Task_2(void *param);
-void Task_3(void *param);
-void Task_4(void *param);
-void Task_5(void *param);
-void Task_6(void *param);
-
-void vApplicationTickHook(void);
-void Intialize_TaskTime(TaskTime_t * inputTaskTime);
-static void prvSetupHardware( void );
-
-#if ( configUSE_EDF_SCHEDULER == 1 )
-	BaseType_t xTaskPeriodicCreate( TaskFunction_t pxTaskCode,
-													const char * const pcName, /*lint !e971 Unqualified char types are allowed for strings and single characters only. */
-													const configSTACK_DEPTH_TYPE usStackDepth,
-													void * const pvParameters,
-													UBaseType_t uxPriority,
-													TaskHandle_t * const pxCreatedTask ,
-													TickType_t period);
-#endif
-
+													
 int main( void )
 {
 	/* Setup the hardware for use with the Keil demo board. */
 	prvSetupHardware();
-	Intialize_TaskTime(performanceEvaluation.taskTime);
-	
+
 	xQueueConsumer = xQueueCreate( QUEUE_LENGTH, sizeof( message_t ) );
 
 	xTaskPeriodicCreate(
-	Task_1, 
-	"Button_1_Monitor", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL,
-	0, 
-	NULL, 
-	PERIODICITY_TASK_1);
-	
-xTaskPeriodicCreate(
-	Task_2, 
-	"Button_2_Monitor", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL,
-	0, 
-	NULL, 
-	PERIODICITY_TASK_2);
-	
-xTaskPeriodicCreate(
-	Task_3, 
-	"Periodic_Transmitter", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL,
-	0, 
-	NULL, 
-	PERIODICITY_TASK_3);
-
-	
+		Task_1, 
+		"Button_1_Monitor", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL,
+		(UBaseType_t) 0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_1);
+		
 	xTaskPeriodicCreate(
-	Task_4, 
-	"Uart_Receiver", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL,
-	0, 
-	NULL, 
-	PERIODICITY_TASK_4);
-	
-xTaskPeriodicCreate(
-	Task_5, 
-	"Load_1_Simulation", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL,
-	0, 
-	NULL, 
-	PERIODICITY_TASK_5);
-	
-xTaskPeriodicCreate(
-	Task_6, 
-	"Load_2_Simulation", 
-	configMINIMAL_STACK_SIZE, 
-	(void *)NULL, 
-	0, 
-	NULL, 
-	PERIODICITY_TASK_6);
+		Task_2, 
+		"Button_2_Monitor", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL,
+		(UBaseType_t)0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_2);
+		
+	xTaskPeriodicCreate(
+		Task_3, 
+		"Periodic_Transmitter", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL,
+		(UBaseType_t)0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_3);
+
+		
+	xTaskPeriodicCreate(
+		Task_4, 
+		"Uart_Receiver", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL,
+		(UBaseType_t)0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_4);
+		
+	xTaskPeriodicCreate(
+		Task_5, 
+		"Load_1_Simulation", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL,
+		(UBaseType_t)0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_5);
+		
+	xTaskPeriodicCreate(
+		Task_6, 
+		"Load_2_Simulation", 
+		configMINIMAL_STACK_SIZE, 
+		(void *)NULL, 
+		(UBaseType_t) 0, 
+		(TaskHandle_t *)NULL, 
+		PERIODICITY_TASK_6);
 	
 	
 	/* Now all the tasks have been started - start the scheduler.
@@ -278,21 +187,21 @@ static void prvSetupHardware( void )
 }
 /*-----------------------------------------------------------*/
 
+				
 
-void Intialize_TaskTime(TaskTime_t * inputTaskTime){
-	uint8_t i;
-	for(i = 0; i<NUMBER_OF_TASKS; i++){
-		(inputTaskTime + i)->inTime = 0;
-		(inputTaskTime + i)->outTime = 0;
-		(inputTaskTime + i)->totalTime = 0;
-	}
-}
-					
 void vApplicationTickHook(void){
 		PULSE_TICK();
 }
 
-
+void vApplicationIdleHook (void){
+	#if (PERFORMANCE_EVALUATION == 1)	
+		for(i=1; i<NUMBER_OF_TASKS+1; i++){
+			performanceEvaluation.temp += performanceEvaluation.taskTime[i].totalTime ;
+		}
+		performanceEvaluation.cpu_Load = (performanceEvaluation.temp/ (float) T1TC) * 100;
+		performanceEvaluation.temp = 0;
+	#endif
+}
 /********************************************** Task 1 **********************/
 void Task_1(void *param){
 	TickType_t xLastWakeTime;
@@ -302,7 +211,7 @@ void Task_1(void *param){
 	pinState_t bCurrentButtonState, bPriviousButtonState = GPIO_read(PORT_1, PIN0);
 	buttonEdge_t buttonEdge;
 	
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)1);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
@@ -357,7 +266,7 @@ void Task_2(void *param){
 	pinState_t bCurrentButtonState, bPriviousButtonState = GPIO_read(PORT_1, PIN1);
 	buttonEdge_t buttonEdge;
 	
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_2);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)2);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
@@ -409,11 +318,12 @@ void Task_3(void *param){
 	message_t xMessegeToSend = {0, 0};
 	xMessegeToSend.ucMessageID = '3';
 
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_3);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)3);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
-		strcpy((char *)(xMessegeToSend.ucData), "Future Work is Digital!");		//TODO: add rand()
+		vStringClear(xMessegeToSend.ucData);
+		vInt2String((uint32_t)(rand()%1024), xMessegeToSend.ucData);
 		xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
 		
 		xQueueSendToBack(xQueueConsumer, &xMessegeToSend, MAX_QUEUE_WAIT_TIME);
@@ -429,7 +339,7 @@ void Task_4(void *param){
 	message_t xMessageBuffer;
 	
 	
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_4);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)4);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
@@ -449,7 +359,7 @@ void Task_4(void *param){
 /********************************************** Task 5 **********************/
 void Task_5(void *param){
 	TickType_t xLastWakeTime;
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_5);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)5);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
@@ -462,7 +372,7 @@ void Task_5(void *param){
 /********************************************** Task 6 **********************/
 void Task_6(void *param){
 	TickType_t xLastWakeTime;
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_6);
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)6);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){	
@@ -471,5 +381,37 @@ void Task_6(void *param){
 	}
 }
 
+void vStringClear(char * inOutString){
+	char * temp;
+	for(i=0; i<MESSAGE_BUFFER_SIZE ; i++){
+		temp = inOutString + i;
+		 if(* temp == 0){
+			 break;
+		 }else{ 
+				*temp = 0;
+		 }
+	 }
+}
+void vInt2String (uint32_t inInteger, char * outString){
+	uint8_t outLocalString[MESSAGE_BUFFER_SIZE] = {0};
 
+	uint8_t stringSize, i = 0;
+	//ASSERT(MESSAGE_BUFFER_SIZE < 10);
+	
+	if(inInteger == 0){
+		*(outString) = TO_ASCII(0);
+	}else{
+		while(inInteger > 0){
+			outLocalString[i] = (uint8_t)(TO_ASCII(inInteger%10));
+			inInteger /= 10;
+			i++;
+		}
 
+		stringSize = strlen((const char *)outLocalString);
+
+		for(i=0; i<stringSize; i++){
+			*(outString + (stringSize-1-i)) = outLocalString[i];
+		}
+	}
+	 
+}

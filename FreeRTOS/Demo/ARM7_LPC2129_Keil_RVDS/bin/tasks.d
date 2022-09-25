@@ -15,4 +15,5 @@
 .\bin\tasks.o: ..\..\Source\include\list.h
 .\bin\tasks.o: ..\..\Source\include\timers.h
 .\bin\tasks.o: ..\..\Source\include\stack_macros.h
+.\bin\tasks.o: ..\..\..\Starter_Files_V1\header\main.h
 .\bin\tasks.o: ..\..\..\Starter_Files_V1\header\GPIO.h
