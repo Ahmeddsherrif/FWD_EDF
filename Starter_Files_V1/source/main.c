@@ -56,6 +56,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 
@@ -104,16 +105,16 @@ static void prvSetupHardware( void );
 
 
 #define PERIODICITY_TASK_1		50
-#define ET_TASK_1						  6
+//#define ET_TASK_1						  6
 														
 #define PERIODICITY_TASK_2		50
-#define ET_TASK_2							2
+//#define ET_TASK_2							2
 														
 #define PERIODICITY_TASK_3		100
-#define ET_TASK_3						  5
+//#define ET_TASK_3						  5
 														
 #define PERIODICITY_TASK_4		20
-#define ET_TASK_4							1
+//#define ET_TASK_4							1
 																																								
 #define PERIODICITY_TASK_5		10
 #define ET_TASK_5						  5
@@ -136,13 +137,20 @@ static void prvSetupHardware( void );
 //trace macros if ndef
 
 					
-
+#define PROBE_TICK				PIN0
+#define PROBE_TASK_1			PIN1
+#define PROBE_TASK_2			PIN2	
+#define PROBE_TASK_3			PIN3
+#define PROBE_TASK_4			PIN4	
+#define PROBE_TASK_5			PIN5
+#define PROBE_TASK_6			PIN6				
+#define PROBE_IDLE				PIN7
 					
 
 					
 					
-
-		
+#define MAX_QUEUE_WAIT_TIME 		5
+#define MESSAGE_BUFFER_SIZE			25
 
 #define PULSE_TICK() 																									\
 					do{																													\
@@ -167,8 +175,14 @@ void vApplicationIdleHook(void);
 
 typedef struct{
 		uint8_t ucMessageID;
-		uint8_t ucData[20];
+		uint8_t ucData[MESSAGE_BUFFER_SIZE];
 }message_t;
+
+typedef enum{
+	RISING,
+	FALLING,
+	NO_CHANGE
+}buttonEdge_t;
 
 
 QueueHandle_t xQueueConsumer;
@@ -177,9 +191,8 @@ int main( void )
 {
 	/* Setup the hardware for use with the Keil demo board. */
 	prvSetupHardware();
-
-
-xQueueConsumer = xQueueCreate( 10, sizeof( message_t ) );
+	
+	xQueueConsumer = xQueueCreate( 10, sizeof( message_t ) );
 
 	xTaskPeriodicCreate(
 	Task_1, 
@@ -302,63 +315,152 @@ void vApplicationIdleHook(void){
 /********************************************** Task 1 **********************/
 void Task_1(void *param){
 	TickType_t xLastWakeTime;
-	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
-//	message_t xMessegeToSend;
+	message_t xMessegeToSend = {0, 0};
+	bool sendMessege = false;
 	
-//	xMessegeToSend.ucMessageID = '1';
+	pinState_t bCurrentButtonState, bPriviousButtonState = GPIO_read(PORT_1, PIN0);
+	buttonEdge_t buttonEdge;
+	
+	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_1);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
-		DUMMY_ET(ET_TASK_1);
+		
+		//NOTE: This is bad practice and it definitely should be performed whitin the ISR with the EDGE detection hardware not in a task
+		bCurrentButtonState = GPIO_read(PORT_1, PIN0);
+		if(bCurrentButtonState != bPriviousButtonState){
+			//start Critical Section
+			bPriviousButtonState = bCurrentButtonState;
+			if(bCurrentButtonState == PIN_IS_HIGH){
+				 buttonEdge = RISING;
+			}else{
+				 buttonEdge = FALLING;
+			}
+			//End Critical Section
+		}else{
+			buttonEdge = NO_CHANGE;
+		}
+		
+		switch((int)buttonEdge){
+			case RISING:{
+					strcpy((char *)(xMessegeToSend.ucData), "Btn1 Rising detected");		
+					xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
+					sendMessege = true;
+				break;
+			}
+			case FALLING:{
+					strcpy((char *)(xMessegeToSend.ucData), "Btn1 Falling detected");		
+					xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
+					sendMessege = true;
+				break;
+			}
+			default: {
+					sendMessege = false;
+				break;
+			}
+		}
+		
+		if(sendMessege == true){
+			xQueueSendToBack(xQueueConsumer, &xMessegeToSend, MAX_QUEUE_WAIT_TIME);
+		}
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_1 );
 	}
 }
 
-/********************************************** Task 2 **********************/
+///********************************************** Task 2 **********************/
 void Task_2(void *param){
 	TickType_t xLastWakeTime;
+	message_t xMessegeToSend = {0, 0};
+	bool sendMessege = false;
+	
+	pinState_t bCurrentButtonState, bPriviousButtonState = GPIO_read(PORT_1, PIN1);
+	buttonEdge_t buttonEdge;
 	
 	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_2);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
-		DUMMY_ET(ET_TASK_2);
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2 );
+		
+		//NOTE: This is bad practice and it definitely should be performed whitin the ISR with the EDGE detection hardware not in a task
+		bCurrentButtonState = GPIO_read(PORT_1, PIN1);
+		if(bCurrentButtonState != bPriviousButtonState){
+			//start Critical Section
+			bPriviousButtonState = bCurrentButtonState;
+			if(bCurrentButtonState == PIN_IS_HIGH){
+				 buttonEdge = RISING;
+			}else{
+				 buttonEdge = FALLING;
+			}
+			//End Critical Section
+		}else{
+			buttonEdge = NO_CHANGE;
+		}
+		
+		switch((int)buttonEdge){
+			case RISING:{
+					strcpy((char *)(xMessegeToSend.ucData), "Btn2 Rising detected");		
+					xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
+					sendMessege = true;
+				break;
+			}
+			case FALLING:{
+					strcpy((char *)(xMessegeToSend.ucData), "Btn2 Falling detected");		
+					xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
+					sendMessege = true;
+				break;
+			}
+			default: {
+					sendMessege = false;
+				break;
+			}
+		}
+		
+		if(sendMessege == true){
+			xQueueSendToBack(xQueueConsumer, &xMessegeToSend, MAX_QUEUE_WAIT_TIME);
+		}
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_2);
 	}
 }
 
 /********************************************** Task 3 **********************/
 void Task_3(void *param){
 	TickType_t xLastWakeTime;
-	
+	message_t xMessegeToSend = {0, 0};
+	xMessegeToSend.ucMessageID = '3';
+
 	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_3);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
-		DUMMY_ET(ET_TASK_3);
+		strcpy((char *)(xMessegeToSend.ucData), "Future Work is Digital!");		//TODO: add rand()
+		xMessegeToSend.ucData[MESSAGE_BUFFER_SIZE-1] = '\n';
+		
+		xQueueSendToBack(xQueueConsumer, &xMessegeToSend, MAX_QUEUE_WAIT_TIME);
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_3 );
 	}
 }
+
+ 
 
 /********************************************** Task 4 **********************/
 void Task_4(void *param){
 	TickType_t xLastWakeTime;
 	message_t xMessageBuffer;
+	
+	
 	vTaskSetApplicationTaskTag(NULL, (TaskHookFunction_t)PROBE_TASK_4);
 	
 	xLastWakeTime = xTaskGetTickCount();
 	for(;;){
-		DUMMY_ET(ET_TASK_4);
-//			if( xQueueReceive( xQueueConsumer,
-//                         &( xMessageBuffer ),
-//                         ( TickType_t ) 10 ) == pdPASS )
-//      {
-//         // uart_send( "Message ID = ");
-//				 // uart_send(xMessageBuffer.ucMessageID);
-//				 // uart_send( "Message Data = ");
-//				 // uart_send(xMessageBuffer.ucData);
-//      }
-		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4 );
+
+			if( xQueueReceive( xQueueConsumer,
+                         &( xMessageBuffer ),
+                         ( TickType_t ) MAX_QUEUE_WAIT_TIME) == pdPASS )
+      {
+         vSerialPutString((signed char *)(xMessageBuffer.ucData), MESSAGE_BUFFER_SIZE);
+      }
+			
+		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_4);
 	}
 }
 
@@ -387,4 +489,6 @@ void Task_6(void *param){
 		vTaskDelayUntil( &xLastWakeTime, PERIODICITY_TASK_6 );
 	}
 }
+
+
 

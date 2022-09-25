@@ -2,6 +2,7 @@
 .\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
 .\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\bin\main.o: ..\..\Source\include\FreeRTOS.h
 .\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\bin\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
