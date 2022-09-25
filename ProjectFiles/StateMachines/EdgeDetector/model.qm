@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="5.2.1" links="0">
+ <framework name="qpc"/>
+ <package name="ActiveObjects" stereotype="0x00">
+  <class name="EdgeDetector" superclass="qpc::QActive">
+   <attribute name="ButtonReading" type="uint8_t" visibility="0x02" properties="0x00"/>
+   <statechart properties="0x00">
+    <state_diagram size="80,50"/>
+   </statechart>
+  </class>
+ </package>
+</model>
