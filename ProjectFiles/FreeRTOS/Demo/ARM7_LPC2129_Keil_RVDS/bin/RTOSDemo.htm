@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\bin\RTOSDemo.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\bin\RTOSDemo.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Sep 25 16:06:13 2022
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Mon Sep 26 01:47:31 2022
 <BR><P>
 <H3>Maximum Stack Usage =        172 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -349,7 +349,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[17]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;xTaskIncrementTick
 </UL>
 
-<P><STRONG><a name="[40]"></a>vApplicationIdleHook</STRONG> (Thumb, 378 bytes, Stack size 24 bytes, main.o(.text))
+<P><STRONG><a name="[40]"></a>vApplicationIdleHook</STRONG> (Thumb, 374 bytes, Stack size 24 bytes, main.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 40<LI>Call Chain = vApplicationIdleHook &rArr; __aeabi_fmul
 </UL>
 <BR>[Calls]<UL><LI><a href="#[43]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul (via Veneer)
@@ -519,7 +519,7 @@ Global Symbols
 <LI><a href="#[55]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uxListRemove
 </UL>
 
-<P><STRONG><a name="[16]"></a>vTaskSwitchContext</STRONG> (Thumb, 232 bytes, Stack size 8 bytes, tasks.o(.text))
+<P><STRONG><a name="[16]"></a>vTaskSwitchContext</STRONG> (Thumb, 158 bytes, Stack size 8 bytes, tasks.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 12<LI>Call Chain = vTaskSwitchContext &rArr; GPIO_write
 </UL>
 <BR>[Calls]<UL><LI><a href="#[5e]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;TagToPinMap
@@ -529,7 +529,7 @@ Global Symbols
 </UL>
 <BR>[Address Reference Count : 1]<UL><LI> portasm.o(PORT_ASM)
 </UL>
-<P><STRONG><a name="[5f]"></a>vTaskSuspend</STRONG> (Thumb, 154 bytes, Stack size 16 bytes, tasks.o(.text), UNUSED)
+<P><STRONG><a name="[5f]"></a>vTaskSuspend</STRONG> (Thumb, 214 bytes, Stack size 16 bytes, tasks.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[4c]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortYield (via Veneer)
 <LI><a href="#[4b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortExitCritical
 <LI><a href="#[49]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vPortEnterCritical
@@ -570,7 +570,7 @@ Global Symbols
 <LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Task_6
 </UL>
 
-<P><STRONG><a name="[3d]"></a>vTaskStartScheduler</STRONG> (Thumb, 120 bytes, Stack size 24 bytes, tasks.o(.text))
+<P><STRONG><a name="[3d]"></a>vTaskStartScheduler</STRONG> (Thumb, 116 bytes, Stack size 24 bytes, tasks.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 156 + Unknown Stack Size
 <LI>Call Chain = vTaskStartScheduler &rArr; xTaskPeriodicCreate &rArr; pvPortMalloc &rArr; xTaskResumeAll &rArr; xTaskIncrementTick &rArr; vApplicationTickHook &rArr; GPIO_write
 </UL>
@@ -700,7 +700,7 @@ Global Symbols
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8 (via Veneer)
 </UL>
 
-<P><STRONG><a name="[77]"></a>xTaskGenericNotifyFromISR</STRONG> (Thumb, 304 bytes, Stack size 48 bytes, tasks.o(.text), UNUSED)
+<P><STRONG><a name="[77]"></a>xTaskGenericNotifyFromISR</STRONG> (Thumb, 306 bytes, Stack size 48 bytes, tasks.o(.text), UNUSED)
 <BR><BR>[Calls]<UL><LI><a href="#[4a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;vListInsert
 <LI><a href="#[76]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__ARM_common_switch8 (via Veneer)
 </UL>

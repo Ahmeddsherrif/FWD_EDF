@@ -5,7 +5,28 @@
   <class name="EdgeDetector" superclass="qpc::QActive">
    <attribute name="ButtonReading" type="uint8_t" visibility="0x02" properties="0x00"/>
    <statechart properties="0x00">
-    <state_diagram size="80,50"/>
+    <initial target="../2">
+     <initial_glyph conn="10,20,5,0,10,18">
+      <action box="0,-2,10,2"/>
+     </initial_glyph>
+    </initial>
+    <state name="Button_High">
+     <tran trig="TRIG1" target="../../2">
+      <tran_glyph conn="56,52,3,1,-26">
+       <action box="-11,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="56,38,26,19"/>
+    </state>
+    <state name="Button_Low">
+     <tran trig="TRIG1" target="../../1">
+      <tran_glyph conn="30,45,1,3,26">
+       <action box="1,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="4,38,26,19"/>
+    </state>
+    <state_diagram size="86,62"/>
    </statechart>
   </class>
  </package>
