@@ -427,11 +427,6 @@
               <FilePath>.\Startup.s</FilePath>
             </File>
             <File>
-              <FileName>serialISR.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\serial\serialISR.s</FilePath>
-            </File>
-            <File>
               <FileName>GPIO.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\Starter_Files_V1\source\GPIO.c</FilePath>
@@ -910,11 +905,6 @@
               <FileName>Startup.s</FileName>
               <FileType>2</FileType>
               <FilePath>.\Startup.s</FilePath>
-            </File>
-            <File>
-              <FileName>serialISR.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>.\serial\serialISR.s</FilePath>
             </File>
             <File>
               <FileName>GPIO.c</FileName>

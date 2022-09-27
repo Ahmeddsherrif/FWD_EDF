@@ -1,8 +1,6 @@
 Dependencies for Project 'RTOSDemo', Target 'RTOSDemo_THUMB': (DO NOT MODIFY !)
 CompilerVersion: 5060750::V5.06 update 6 (build 750)::ARMCC
 F (.\Startup.s)(0x63305B85)(--cpu ARM7TDMI --pd "__EVAL SETA 1" -g --apcs=interwork -I ..\..\Source\portable\RVDS\ARM7_LPC21xx-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\Philips--pd "__UVISION_VERSION SETA 532"--list .\startup.lst --xref -o .\bin\startup.o --depend .\bin\startup.d)
-F (.\serial\serialISR.s)(0x63305B85)(--cpu ARM7TDMI --pd "__EVAL SETA 1" -g --apcs=interwork -I ..\..\Source\portable\RVDS\ARM7_LPC21xx-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\Philips--pd "__UVISION_VERSION SETA 532"--list .\serialisr.lst --xref -o .\bin\serialisr.o --depend .\bin\serialisr.d)
-I (..\..\Source\portable\RVDS\ARM7_LPC21xx\portmacro.inc)(0x63305B85)
 F (..\..\..\Starter_Files_V1\source\GPIO.c)(0x63305B85)(--thumb -c --cpu ARM7TDMI -D__EVAL -g -W -O0 --apcs=interwork -I . -I ..\..\Source\portable\RVDS\ARM7_LPC21xx -I ..\Common\include -I ..\..\Source\include -I ..\..\..\Starter_Files_V1\header -I ..\..\..\Starter_Files_V1\lib-IC:\Keil_v5\ARM\RV31\INC-IC:\Keil_v5\ARM\CMSIS\Include-IC:\Keil_v5\ARM\INC\Philips-D__UVISION_VERSION="532" -DARM7_LPC21xx_KEIL_RVDS -DKEIL_THUMB_INTERWORK-o .\bin\gpio.o --omf_browse .\bin\gpio.crf --depend .\bin\gpio.d)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5D9B2678)
 I (..\..\..\Starter_Files_V1\lib\bit_math.h)(0x63305B85)

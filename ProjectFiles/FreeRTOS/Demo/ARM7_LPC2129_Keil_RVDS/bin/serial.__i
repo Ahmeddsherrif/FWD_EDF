@@ -1,0 +1,6 @@
+--thumb -c --cpu ARM7TDMI -D__EVAL -g -W -O0 --apcs=interwork -I . -I ..\..\Source\portable\RVDS\ARM7_LPC21xx -I ..\Common\include -I ..\..\Source\include -I ..\..\..\Starter_Files_V1\header -I ..\..\..\Starter_Files_V1\lib
+-IC:\Keil_v5\ARM\RV31\INC
+-IC:\Keil_v5\ARM\CMSIS\Include
+-IC:\Keil_v5\ARM\INC\Philips
+-D__UVISION_VERSION="532" -DARM7_LPC21xx_KEIL_RVDS -DKEIL_THUMB_INTERWORK
+-o .\bin\serial.o --omf_browse .\bin\serial.crf --depend .\bin\serial.d "..\..\..\Starter_Files_V1\source\serial.c"

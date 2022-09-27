@@ -180,51 +180,51 @@ void xSerialPutChar(signed char cOutChar)
 }
 /*-----------------------------------------------------------*/
 
-void vUART_ISRHandler( void )
-{
-signed char cChar;
-unsigned char ucInterrupt;
+//void vUART_ISRHandler( void )
+//{
+//signed char cChar;
+//unsigned char ucInterrupt;
 
-	ucInterrupt = U1IIR;
+//	ucInterrupt = U1IIR;
 
-	/* The interrupt pending bit is active low. */
-	while( ( ucInterrupt & serINTERRUPT_IS_PENDING ) == 0 )
-	{
-		/* What caused the interrupt? */
-		switch( ucInterrupt & serINTERRUPT_SOURCE_MASK )
-		{
-			case serSOURCE_ERROR :	/* Not handling this, but clear the interrupt. */
-				cChar = U1LSR;
-				break;
-	
-			case serSOURCE_THRE	:	/* The THRE is empty */
-				
-				/* Do nothing */
-				if(txDataSizeLeftToSend > 0)
-				{
-					U1THR = txBuffer[txDataSizeToSend - txDataSizeLeftToSend--];
-				}
-				
-				break;
-	
-			case serSOURCE_RX_TIMEOUT :
-			case serSOURCE_RX	:	/* A character was received */
-			
-				receivedChar = U1RBR;
-				isNewCharAvailable = 1U;			
-				break;
-	
-			default:	/* There is nothing to do, leave the ISR. */
-				break;
-		}
+//	/* The interrupt pending bit is active low. */
+//	while( ( ucInterrupt & serINTERRUPT_IS_PENDING ) == 0 )
+//	{
+//		/* What caused the interrupt? */
+//		switch( ucInterrupt & serINTERRUPT_SOURCE_MASK )
+//		{
+//			case serSOURCE_ERROR :	/* Not handling this, but clear the interrupt. */
+//				cChar = U1LSR;
+//				break;
+//	
+//			case serSOURCE_THRE	:	/* The THRE is empty */
+//				
+//				/* Do nothing */
+//				if(txDataSizeLeftToSend > 0)
+//				{
+//					U1THR = txBuffer[txDataSizeToSend - txDataSizeLeftToSend--];
+//				}
+//				
+//				break;
+//	
+//			case serSOURCE_RX_TIMEOUT :
+//			case serSOURCE_RX	:	/* A character was received */
+//			
+//				receivedChar = U1RBR;
+//				isNewCharAvailable = 1U;			
+//				break;
+//	
+//			default:	/* There is nothing to do, leave the ISR. */
+//				break;
+//		}
 
-		ucInterrupt = U1IIR;
-	}
+//		ucInterrupt = U1IIR;
+//	}
 
-	/* Clear the ISR in the VIC. */
-	VICVectAddr = serCLEAR_VIC_INTERRUPT;
-}
-/*-----------------------------------------------------------*/
+//	/* Clear the ISR in the VIC. */
+//	VICVectAddr = serCLEAR_VIC_INTERRUPT;
+//}
+///*-----------------------------------------------------------*/
 
 
 
